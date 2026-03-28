@@ -106,9 +106,9 @@ export default function Register() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden"
+        className="hidden lg:flex flex-col justify-center w-1/2 p-12 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 50%, #1a1a2e 100%)',
+          background: 'linear-gradient(145deg, #141728 0%, #101525 45%, #0a2633 100%)',
         }}
       >
         {/* Background decorative blobs */}
@@ -127,7 +127,7 @@ export default function Register() {
         </div>
 
         {/* Logo */}
-        <div className="relative z-10">
+        <div className="relative z-10 mb-14">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#06b6d4] flex items-center justify-center text-white text-xl shadow-lg shadow-[#7c3aed]/30">
               🎯
@@ -143,12 +143,12 @@ export default function Register() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="relative z-10 space-y-8"
+          className="relative z-10 space-y-7 max-w-xl"
         >
           <div className="space-y-4">
             <motion.h1
               variants={itemVariants}
-              className="text-4xl font-bold text-white leading-tight"
+              className="text-5xl font-bold text-white leading-[1.1]"
             >
               Start your{' '}
               <span className="bg-gradient-to-r from-[#06b6d4] to-[#7c3aed] bg-clip-text text-transparent">
@@ -156,12 +156,12 @@ export default function Register() {
               </span>{' '}
               today
             </motion.h1>
-            <motion.p variants={itemVariants} className="text-gray-400 text-lg leading-relaxed">
-              Join thousands of students who cracked their dream companies using PlacePrep.
+            <motion.p variants={itemVariants} className="text-gray-300 text-lg leading-relaxed">
+              Build confidence with guided DSA practice, mock interviews, and resume tools.
             </motion.p>
           </div>
 
-          <motion.div variants={itemVariants} className="space-y-4">
+          <motion.div variants={itemVariants} className="space-y-3">
             {FEATURES.map((feature, idx) => {
               const Icon = feature.icon;
               return (
@@ -170,12 +170,12 @@ export default function Register() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + idx * 0.1, duration: 0.5 }}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
                 >
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#06b6d4]/20 to-[#7c3aed]/20 border border-[#06b6d4]/30 flex items-center justify-center flex-shrink-0">
                     <Icon className="w-4 h-4 text-[#7c3aed]" />
                   </div>
-                  <span className="text-gray-300 text-sm">{feature.text}</span>
+                  <span className="text-gray-200 text-sm">{feature.text}</span>
                 </motion.div>
               );
             })}
@@ -245,7 +245,7 @@ export default function Register() {
                     name="name"
                     value={form.name}
                     onChange={handleChange}
-                    placeholder="John Doe"
+                    placeholder="Name"
                     autoComplete="name"
                     className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-[var(--text-primary)] bg-white/5 placeholder:text-[var(--text-secondary)] outline-none transition-all duration-200 focus:ring-2 focus:ring-[#7c3aed]/40 ${
                       errors.name
