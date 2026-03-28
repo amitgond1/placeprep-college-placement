@@ -4,6 +4,8 @@ server/node_modules/
 
 dist/
 client/dist/
+build/
+client/build/
 
 .env
 server/.env
