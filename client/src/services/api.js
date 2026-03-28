@@ -5,12 +5,15 @@ function deriveRenderApiBaseUrl() {
   const host = window.location.hostname;
   if (!host.endsWith('.onrender.com')) return null;
 
-  const mappedHost = host
-    .replace(/-college-placement(?=\.onrender\.com$)/, '-api')
-    .replace(/-web(?=\.onrender\.com$)/, '-api');
+  const candidates = [
+    host.replace(/-college-placement(?=\.onrender\.com$)/, '-college-placement-backend'),
+    host.replace(/-college-placement(?=\.onrender\.com$)/, '-api'),
+    host.replace(/-web(?=\.onrender\.com$)/, '-backend'),
+    host.replace(/-web(?=\.onrender\.com$)/, '-api')
+  ].filter(candidate => candidate !== host);
 
-  if (mappedHost === host) return null;
-  return `https://${mappedHost}/api`;
+  if (!candidates.length) return null;
+  return `https://${candidates[0]}/api`;
 }
 
 const apiBaseUrl =
