@@ -1,24 +1,41 @@
 const nodemailer = require('nodemailer');
 
+const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com';
+const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
+const EMAIL_SECURE = EMAIL_PORT === 465;
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+const EMAIL_ENABLED = Boolean(EMAIL_USER && EMAIL_PASS);
+
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: Number(process.env.EMAIL_PORT) || 587,
-  secure: false,
+  host: EMAIL_HOST,
+  port: EMAIL_PORT,
+  secure: EMAIL_SECURE,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: EMAIL_USER,
+    pass: EMAIL_PASS
   }
 });
 
-const FROM = process.env.EMAIL_FROM || 'PlacePrep <noreply@placeprep.app>';
+const FROM = process.env.EMAIL_FROM || `PlacePrep <${EMAIL_USER || 'noreply@placeprep.app'}>`;
+
+if (EMAIL_ENABLED) {
+  transporter.verify()
+    .then(() => console.log(`[email] SMTP ready on ${EMAIL_HOST}:${EMAIL_PORT}`))
+    .catch((err) => console.error('[email] SMTP verify failed:', err.message));
+} else {
+  console.warn('[email] Disabled: EMAIL_USER / EMAIL_PASS missing');
+}
 
 async function sendWelcomeEmail(user) {
-  if (!process.env.EMAIL_USER) return;
+  if (!EMAIL_ENABLED || !user?.email) return { sent: false, reason: 'email-disabled-or-missing-recipient' };
+
   const companies = user.targetCompanies?.join(', ') || 'Not set';
+
   await transporter.sendMail({
     from: FROM,
     to: user.email,
-    subject: `Welcome to PlacePrep, ${user.name}! 🚀`,
+    subject: `Welcome to PlacePrep, ${user.name}!`,
     html: `
     <!DOCTYPE html>
     <html>
@@ -39,51 +56,55 @@ async function sendWelcomeEmail(user) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🎯 Welcome to PlacePrep!</h1>
+          <h1>Welcome to PlacePrep!</h1>
           <p>Your placement journey starts today, ${user.name}!</p>
         </div>
         <div class="body">
           <p style="color:#334155;font-size:16px;">
-            You've taken the first step towards landing your dream job. PlacePrep will guide you through
+            You have taken the first step towards landing your dream job. PlacePrep will guide you through
             every step of your campus placement journey.
           </p>
           ${user.targetPackage ? `
           <div class="stat">
-            <label>🎯 Target Package</label>
+            <label>Target Package</label>
             <value>${user.targetPackage} LPA</value>
           </div>` : ''}
           ${user.targetCompanies?.length ? `
           <div class="stat">
-            <label>🏢 Target Companies</label>
+            <label>Target Companies</label>
             <value style="font-size:14px">${companies}</value>
           </div>` : ''}
           <div class="stat">
-            <label>📅 Your Journey</label>
+            <label>Your Journey</label>
             <value>DSA Practice + Mock Interviews + Resume Building</value>
           </div>
           <div class="cta">
             <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" class="btn">
-              🚀 Start Preparing Now
+              Start Preparing Now
             </a>
           </div>
           <p style="color:#64748b;font-size:14px;text-align:center">
             Complete DSA daily goals, practice mock interviews, and build an ATS-optimized resume.
           </p>
         </div>
-        <div class="footer">PlacePrep — Built for B.Tech students</div>
+        <div class="footer">PlacePrep - Built for B.Tech students</div>
       </div>
     </body>
     </html>
-    `
+    `,
+    text: `Welcome to PlacePrep, ${user.name}! Start here: ${process.env.CLIENT_URL || 'http://localhost:5173'}`
   });
+
+  return { sent: true };
 }
 
 async function sendDSAReminderEmail(user) {
-  if (!process.env.EMAIL_USER || !user.emailReminders) return;
+  if (!EMAIL_ENABLED || !user.emailReminders) return;
+
   await transporter.sendMail({
     from: FROM,
     to: user.email,
-    subject: `⚠️ PlacePrep Alert: Don't break your streak, ${user.name}!`,
+    subject: `PlacePrep Alert: Don't break your streak, ${user.name}!`,
     html: `
     <!DOCTYPE html>
     <html><head><style>
@@ -97,17 +118,17 @@ async function sendDSAReminderEmail(user) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>⚠️ Goal Not Met Yet!</h1>
+          <h1>Goal Not Met Yet!</h1>
         </div>
         <div class="body">
-          <div class="streak">🔥 ${user.currentStreak}</div>
-          <h2>You haven't solved your ${user.dailyGoal} problems today!</h2>
-          <p style="color:#64748b">Don't break your ${user.currentStreak}-day streak! You're so close to your daily goal.</p>
+          <div class="streak">${user.currentStreak}</div>
+          <h2>You have not solved your ${user.dailyGoal} problems today!</h2>
+          <p style="color:#64748b">Do not break your ${user.currentStreak}-day streak. You are close to your daily goal.</p>
           <br/>
           <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dsa" class="btn">
-            💪 Solve Now
+            Solve Now
           </a>
-          <p style="color:#94a3b8;font-size:12px;margin-top:24px">You have until midnight to complete your daily goal!</p>
+          <p style="color:#94a3b8;font-size:12px;margin-top:24px">You have until midnight to complete your daily goal.</p>
         </div>
       </div>
     </body></html>
@@ -116,11 +137,12 @@ async function sendDSAReminderEmail(user) {
 }
 
 async function sendWeeklyReport(user, stats) {
-  if (!process.env.EMAIL_USER || !user.weeklyReport) return;
+  if (!EMAIL_ENABLED || !user.weeklyReport) return;
+
   await transporter.sendMail({
     from: FROM,
     to: user.email,
-    subject: `📊 Your Weekly PlacePrep Report — ${stats.problemsSolved} problems solved!`,
+    subject: `Your Weekly PlacePrep Report - ${stats.problemsSolved} problems solved!`,
     html: `
     <!DOCTYPE html>
     <html><head><style>
@@ -137,8 +159,8 @@ async function sendWeeklyReport(user, stats) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>📊 Weekly Report</h1>
-          <p>Here's how you did this week, ${user.name}!</p>
+          <h1>Weekly Report</h1>
+          <p>Here is how you did this week, ${user.name}!</p>
         </div>
         <div class="stats">
           <div class="stat"><div class="num">${stats.problemsSolved}</div><div class="label">Problems Solved</div></div>
@@ -146,7 +168,7 @@ async function sendWeeklyReport(user, stats) {
           <div class="stat"><div class="num">${stats.atsScore || 'N/A'}</div><div class="label">ATS Score</div></div>
         </div>
         <div class="body" style="text-align:center">
-          <p style="color:#334155">Streak: 🔥 ${user.currentStreak} days | Total Solved: ${user.dsaSolvedTotal}</p>
+          <p style="color:#334155">Streak: ${user.currentStreak} days | Total Solved: ${user.dsaSolvedTotal}</p>
           <br/>
           <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" class="btn">View Full Dashboard</a>
         </div>
@@ -157,19 +179,20 @@ async function sendWeeklyReport(user, stats) {
 }
 
 async function sendStreakBrokenEmail(user) {
-  if (!process.env.EMAIL_USER || !user.emailReminders) return;
+  if (!EMAIL_ENABLED || !user.emailReminders) return;
+
   await transporter.sendMail({
     from: FROM,
     to: user.email,
-    subject: `😔 You broke your streak — Start again today, ${user.name}!`,
+    subject: `You broke your streak - Start again today, ${user.name}!`,
     html: `
     <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px">
-      <h2 style="color:#1a1a2e">Streak Broken 😔</h2>
-      <p>Your ${user.longestStreak}-day streak was broken. Don't let that stop you!</p>
-      <p>Every champion has setbacks. Start fresh today and build an even bigger streak!</p>
+      <h2 style="color:#1a1a2e">Streak Broken</h2>
+      <p>Your ${user.longestStreak}-day streak was broken. Do not let that stop you!</p>
+      <p>Every champion has setbacks. Start fresh today and build an even bigger streak.</p>
       <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dsa"
          style="background:linear-gradient(135deg,#7c3aed,#06b6d4);color:white;padding:14px 32px;border-radius:50px;text-decoration:none;font-weight:bold;display:inline-block">
-        Start New Streak 🔥
+        Start New Streak
       </a>
     </div>
     `

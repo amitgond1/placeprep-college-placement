@@ -23,7 +23,13 @@ router.post('/register', async (req, res) => {
     const token = signToken(user._id);
 
     // Send welcome email (non-blocking)
-    sendWelcomeEmail(user).catch(console.error);
+    sendWelcomeEmail(user)
+      .then((result) => {
+        if (result?.sent === false) {
+          console.warn(`[email] welcome mail not sent for ${user.email}: ${result.reason}`);
+        }
+      })
+      .catch((err) => console.error('[email] welcome mail error:', err.message));
 
     res.status(201).json({
       token,
@@ -85,7 +91,13 @@ router.post('/onboard', protect, async (req, res) => {
     );
 
     // Send welcome email with full details
-    sendWelcomeEmail(user).catch(console.error);
+    sendWelcomeEmail(user)
+      .then((result) => {
+        if (result?.sent === false) {
+          console.warn(`[email] onboarding mail not sent for ${user.email}: ${result.reason}`);
+        }
+      })
+      .catch((err) => console.error('[email] onboarding mail error:', err.message));
 
     res.json({ message: 'Onboarding complete', user });
   } catch (err) {
