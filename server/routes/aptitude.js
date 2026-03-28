@@ -144,8 +144,9 @@ router.get('/results', protect, async (req, res) => {
 // GET /api/aptitude/results/:id
 router.get('/results/:id', protect, async (req, res) => {
   try {
-    const result = await AptitudeMockResult.findById(req.params.id)
-      .populate('answers.questionId');
+    const result = await AptitudeMockResult.findOne({ _id: req.params.id, userId: req.user._id })
+      .populate('answers.questionId')
+      .lean();
     if (!result) return res.status(404).json({ message: 'Result not found' });
     res.json({ result });
   } catch (err) {

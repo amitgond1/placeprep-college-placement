@@ -6,6 +6,7 @@ const EMAIL_SECURE = EMAIL_PORT === 465;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 const EMAIL_ENABLED = Boolean(EMAIL_USER && EMAIL_PASS);
+const RETRYABLE_ERROR_SNIPPETS = ['timeout', 'timed out', 'ECONNECTION', 'ETIMEDOUT', 'socket'];
 
 const transporter = nodemailer.createTransport({
   host: EMAIL_HOST,
@@ -20,7 +21,9 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const FROM = process.env.EMAIL_FROM || `PlacePrep <${EMAIL_USER || 'noreply@placeprep.app'}>`;
+const FROM = EMAIL_USER
+  ? `PlacePrep <${EMAIL_USER}>`
+  : (process.env.EMAIL_FROM || 'PlacePrep <noreply@placeprep.app>');
 
 if (EMAIL_ENABLED) {
   transporter.verify()
@@ -30,12 +33,35 @@ if (EMAIL_ENABLED) {
   console.warn('[email] Disabled: EMAIL_USER / EMAIL_PASS missing');
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isRetryableMailError(error) {
+  const message = String(error?.message || '').toLowerCase();
+  return RETRYABLE_ERROR_SNIPPETS.some((snippet) => message.includes(snippet.toLowerCase()));
+}
+
+async function sendMailWithRetry(mailOptions, retries = 2) {
+  let lastError = null;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await transporter.sendMail(mailOptions);
+    } catch (error) {
+      lastError = error;
+      if (attempt >= retries || !isRetryableMailError(error)) break;
+      const waitMs = 800 * (attempt + 1);
+      console.warn(`[email] retrying sendMail in ${waitMs}ms (${attempt + 1}/${retries})`);
+      await sleep(waitMs);
+    }
+  }
+  throw lastError;
+}
+
 async function sendWelcomeEmail(user) {
   if (!EMAIL_ENABLED || !user?.email) return { sent: false, reason: 'email-disabled-or-missing-recipient' };
 
   const companies = user.targetCompanies?.join(', ') || 'Not set';
 
-  await transporter.sendMail({
+  await sendMailWithRetry({
     from: FROM,
     to: user.email,
     subject: `Welcome to PlacePrep, ${user.name}!`,
@@ -96,7 +122,7 @@ async function sendWelcomeEmail(user) {
     </html>
     `,
     text: `Welcome to PlacePrep, ${user.name}! Start here: ${process.env.CLIENT_URL || 'http://localhost:5173'}`
-  });
+  }, 2);
 
   return { sent: true };
 }
@@ -104,7 +130,7 @@ async function sendWelcomeEmail(user) {
 async function sendDSAReminderEmail(user) {
   if (!EMAIL_ENABLED || !user.emailReminders) return;
 
-  await transporter.sendMail({
+  await sendMailWithRetry({
     from: FROM,
     to: user.email,
     subject: `PlacePrep Alert: Don't break your streak, ${user.name}!`,
@@ -136,13 +162,13 @@ async function sendDSAReminderEmail(user) {
       </div>
     </body></html>
     `
-  });
+  }, 2);
 }
 
 async function sendWeeklyReport(user, stats) {
   if (!EMAIL_ENABLED || !user.weeklyReport) return;
 
-  await transporter.sendMail({
+  await sendMailWithRetry({
     from: FROM,
     to: user.email,
     subject: `Your Weekly PlacePrep Report - ${stats.problemsSolved} problems solved!`,
@@ -178,13 +204,13 @@ async function sendWeeklyReport(user, stats) {
       </div>
     </body></html>
     `
-  });
+  }, 2);
 }
 
 async function sendStreakBrokenEmail(user) {
   if (!EMAIL_ENABLED || !user.emailReminders) return;
 
-  await transporter.sendMail({
+  await sendMailWithRetry({
     from: FROM,
     to: user.email,
     subject: `You broke your streak - Start again today, ${user.name}!`,
@@ -199,7 +225,7 @@ async function sendStreakBrokenEmail(user) {
       </a>
     </div>
     `
-  });
+  }, 2);
 }
 
 module.exports = { sendWelcomeEmail, sendDSAReminderEmail, sendWeeklyReport, sendStreakBrokenEmail };

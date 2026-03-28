@@ -84,13 +84,27 @@ export default function AptitudeMockTest() {
     setSubmitting(true);
     const timeTaken = Math.round((Date.now() - startTimeRef.current) / 1000);
     try {
+      const finalQuestionTimes = { ...questionTimes };
+      const currentQuestionId = questions[current]?._id;
+      if (currentQuestionId) {
+        const elapsed = Math.round((Date.now() - qStartTime) / 1000);
+        finalQuestionTimes[currentQuestionId] = (finalQuestionTimes[currentQuestionId] || 0) + elapsed;
+      }
+
       const { data } = await api.post(`/aptitude/mock/${mockId}/submit`, {
-        answers, timeTaken, negativeMarking, questionTimes
+        answers, timeTaken, negativeMarking, questionTimes: finalQuestionTimes
       });
+      if (!data?.resultId) {
+        throw new Error('Submission response is incomplete. Please retry.');
+      }
       toast.success(`Score: ${data.score}/25`);
       navigate(`/aptitude/results/${data.resultId}`);
-    } catch { toast.error('Submission failed'); setSubmitting(false); }
-  }, [answers, mockId, negativeMarking, questionTimes]);
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.message || 'Submission failed';
+      toast.error(message);
+      setSubmitting(false);
+    }
+  }, [answers, current, mockId, navigate, negativeMarking, qStartTime, questionTimes, questions]);
 
   const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
