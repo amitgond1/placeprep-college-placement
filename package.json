@@ -1,0 +1,17 @@
+{
+  "name": "placeprep",
+  "version": "1.0.0",
+  "description": "PlacePrep — College Placement Command Center",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "seed": "cd server && npm run seed",
+    "seed:aptitude": "cd server && npm run seed:aptitude",
+    "seed:all": "cd server && npm run seed && npm run seed:aptitude"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
