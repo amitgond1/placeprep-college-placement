@@ -9,6 +9,18 @@ const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, {
   expiresIn: process.env.JWT_EXPIRES_IN || '7d'
 });
 
+function queueWelcomeEmail(user, context = 'welcome') {
+  sendWelcomeEmail(user)
+    .then((result) => {
+      if (result?.sent === false) {
+        console.warn(`[email] ${context} mail not sent for ${user.email}: ${result.reason}`);
+      } else {
+        console.log(`[email] ${context} mail sent to ${user.email}`);
+      }
+    })
+    .catch((err) => console.error(`[email] ${context} mail error for ${user.email}:`, err.message));
+}
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
@@ -21,22 +33,9 @@ router.post('/register', async (req, res) => {
 
     const user = await User.create({ name, email, password });
     const token = signToken(user._id);
-    let welcomeEmailSent = false;
-    let welcomeEmailMessage = 'Welcome email not sent';
 
-    try {
-      const result = await sendWelcomeEmail(user);
-      welcomeEmailSent = Boolean(result?.sent);
-      if (result?.sent === false) {
-        welcomeEmailMessage = result.reason || 'email-not-sent';
-        console.warn(`[email] welcome mail not sent for ${user.email}: ${welcomeEmailMessage}`);
-      } else {
-        welcomeEmailMessage = 'Welcome email sent';
-      }
-    } catch (err) {
-      welcomeEmailMessage = err.message || 'email-send-failed';
-      console.error('[email] welcome mail error:', welcomeEmailMessage);
-    }
+    // Do not block registration on SMTP/network delays.
+    queueWelcomeEmail(user, 'welcome');
 
     res.status(201).json({
       token,
@@ -44,8 +43,8 @@ router.post('/register', async (req, res) => {
         _id: user._id, name: user.name, email: user.email,
         isOnboarded: user.isOnboarded, avatar: user.avatar
       },
-      welcomeEmailSent,
-      welcomeEmailMessage
+      welcomeEmailSent: null,
+      welcomeEmailMessage: 'Welcome email queued'
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -99,14 +98,8 @@ router.post('/onboard', protect, async (req, res) => {
       { new: true }
     );
 
-    // Send welcome email with full details
-    sendWelcomeEmail(user)
-      .then((result) => {
-        if (result?.sent === false) {
-          console.warn(`[email] onboarding mail not sent for ${user.email}: ${result.reason}`);
-        }
-      })
-      .catch((err) => console.error('[email] onboarding mail error:', err.message));
+    // Send welcome email with full details in background.
+    queueWelcomeEmail(user, 'onboarding');
 
     res.json({ message: 'Onboarding complete', user });
   } catch (err) {
@@ -117,8 +110,22 @@ router.post('/onboard', protect, async (req, res) => {
 // POST /api/auth/resend-welcome
 router.post('/resend-welcome', protect, async (req, res) => {
   try {
-    const result = await sendWelcomeEmail(req.user);
+    const result = await Promise.race([
+      sendWelcomeEmail(req.user),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ sent: false, reason: 'email-request-timeout' }),
+        12000
+      ))
+    ]);
+
     if (result?.sent === false) {
+      if (result.reason === 'email-request-timeout') {
+        queueWelcomeEmail(req.user, 'resend');
+        return res.status(202).json({
+          message: 'Email request queued. SMTP is slow, please check inbox after a few minutes.',
+          reason: result.reason
+        });
+      }
       return res.status(400).json({
         message: 'Could not send welcome email',
         reason: result.reason || 'email-not-sent'

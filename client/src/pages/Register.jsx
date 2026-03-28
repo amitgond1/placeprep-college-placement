@@ -75,10 +75,15 @@ export default function Register() {
       const result = await register(form.name.trim(), form.email, form.password);
       if (result?.welcomeEmailSent) {
         toast.success("Account created! Welcome email sent. Let's set up your profile.");
-      } else {
+      } else if (result?.welcomeEmailSent === false) {
         const reason = result?.welcomeEmailMessage || 'email-not-sent';
         toast.success("Account created! Let's set up your profile.");
         toast.error(`Email not sent yet (${reason}). You can continue and resend later.`);
+      } else {
+        toast.success("Account created! Let's set up your profile.");
+        toast('Welcome email is queued. Check inbox/spam in a few minutes.', {
+          icon: '📨',
+        });
       }
       navigate('/onboarding');
     } catch (err) {
