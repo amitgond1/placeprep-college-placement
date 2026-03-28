@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
     assertAuthPayload(data);
     localStorage.setItem('token', data.token);
     setUser(data.user);
-    return data.user;
+    return data;
   };
 
   const logout = () => {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { GraduationCap, Target, Building2, Settings, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { GraduationCap, Target, Building2, Settings, ChevronRight, ChevronLeft, Check, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -19,6 +19,7 @@ const steps = [
 export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resendingMail, setResendingMail] = useState(false);
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -52,6 +53,20 @@ export default function Onboarding() {
     return true;
   };
 
+  const handleResendWelcomeEmail = async () => {
+    if (resendingMail) return;
+    setResendingMail(true);
+    try {
+      const { data } = await api.post('/auth/resend-welcome');
+      toast.success(data?.message || 'Welcome email sent successfully');
+    } catch (e) {
+      const msg = e?.response?.data?.message || 'Could not resend welcome email';
+      toast.error(msg);
+    } finally {
+      setResendingMail(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-primary)' }}>
       <div className="w-full max-w-2xl">
@@ -59,6 +74,15 @@ export default function Onboarding() {
           <div className="text-4xl mb-2">🎯</div>
           <h1 className="text-2xl font-bold gradient-text">Welcome, {user?.name?.split(' ')[0]}!</h1>
           <p style={{ color: 'var(--text-secondary)' }} className="mt-1">Set up your placement journey in 4 quick steps</p>
+          <button
+            onClick={handleResendWelcomeEmail}
+            disabled={resendingMail}
+            className="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border disabled:opacity-60"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+          >
+            <Mail size={13} />
+            {resendingMail ? 'Sending mail...' : 'Resend welcome email'}
+          </button>
         </div>
 
         {/* Progress */}

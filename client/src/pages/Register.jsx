@@ -72,8 +72,14 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register(form.name.trim(), form.email, form.password);
-      toast.success('Account created! Let\'s set up your profile 🎉');
+      const result = await register(form.name.trim(), form.email, form.password);
+      if (result?.welcomeEmailSent) {
+        toast.success("Account created! Welcome email sent. Let's set up your profile.");
+      } else {
+        const reason = result?.welcomeEmailMessage || 'email-not-sent';
+        toast.success("Account created! Let's set up your profile.");
+        toast.error(`Email not sent yet (${reason}). You can continue and resend later.`);
+      }
       navigate('/onboarding');
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || 'Registration failed. Please try again.';

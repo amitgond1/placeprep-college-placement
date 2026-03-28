@@ -21,22 +21,31 @@ router.post('/register', async (req, res) => {
 
     const user = await User.create({ name, email, password });
     const token = signToken(user._id);
+    let welcomeEmailSent = false;
+    let welcomeEmailMessage = 'Welcome email not sent';
 
-    // Send welcome email (non-blocking)
-    sendWelcomeEmail(user)
-      .then((result) => {
-        if (result?.sent === false) {
-          console.warn(`[email] welcome mail not sent for ${user.email}: ${result.reason}`);
-        }
-      })
-      .catch((err) => console.error('[email] welcome mail error:', err.message));
+    try {
+      const result = await sendWelcomeEmail(user);
+      welcomeEmailSent = Boolean(result?.sent);
+      if (result?.sent === false) {
+        welcomeEmailMessage = result.reason || 'email-not-sent';
+        console.warn(`[email] welcome mail not sent for ${user.email}: ${welcomeEmailMessage}`);
+      } else {
+        welcomeEmailMessage = 'Welcome email sent';
+      }
+    } catch (err) {
+      welcomeEmailMessage = err.message || 'email-send-failed';
+      console.error('[email] welcome mail error:', welcomeEmailMessage);
+    }
 
     res.status(201).json({
       token,
       user: {
         _id: user._id, name: user.name, email: user.email,
         isOnboarded: user.isOnboarded, avatar: user.avatar
-      }
+      },
+      welcomeEmailSent,
+      welcomeEmailMessage
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -102,6 +111,23 @@ router.post('/onboard', protect, async (req, res) => {
     res.json({ message: 'Onboarding complete', user });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/auth/resend-welcome
+router.post('/resend-welcome', protect, async (req, res) => {
+  try {
+    const result = await sendWelcomeEmail(req.user);
+    if (result?.sent === false) {
+      return res.status(400).json({
+        message: 'Could not send welcome email',
+        reason: result.reason || 'email-not-sent'
+      });
+    }
+    return res.json({ message: 'Welcome email sent successfully' });
+  } catch (err) {
+    console.error('[email] resend welcome mail error:', err.message);
+    return res.status(500).json({ message: err.message || 'Failed to resend welcome email' });
   }
 });
 
