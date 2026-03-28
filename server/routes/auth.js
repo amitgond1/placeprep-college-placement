@@ -95,25 +95,21 @@ router.post('/onboard', protect, async (req, res) => {
       { new: true }
     );
 
-    const emailResult = await Promise.race([
-      sendWelcomeEmail(user).catch((mailErr) => {
-        console.error('[email] onboarding welcome mail error:', mailErr.message);
-        return { sent: false, reason: mailErr.message || 'email-send-error' };
-      }),
-      new Promise((resolve) => setTimeout(
-        () => resolve({ sent: false, reason: 'email-request-timeout' }),
-        22000
-      ))
-    ]);
+    const emailResult = await sendWelcomeEmail(user).catch((mailErr) => {
+      console.error('[email] onboarding welcome mail error:', mailErr.message);
+      return { sent: false, reason: mailErr.message || 'email-send-error' };
+    });
 
     let welcomeEmailSent = Boolean(emailResult?.sent);
     let welcomeEmailMessage = welcomeEmailSent
       ? 'Welcome email sent successfully'
       : (emailResult?.reason || 'email-not-sent');
 
-    if (!welcomeEmailSent && emailResult?.reason === 'email-request-timeout') {
-      queueWelcomeEmail(user, 'onboarding-delayed');
-      welcomeEmailMessage = 'Email request timed out, queued in background';
+    if (!welcomeEmailSent) {
+      queueWelcomeEmail(user, 'onboarding-retry');
+      if (welcomeEmailMessage === 'email-request-timeout') {
+        welcomeEmailMessage = 'Email request timed out, retry queued in background';
+      }
     }
 
     res.json({ message: 'Onboarding complete', user, welcomeEmailSent, welcomeEmailMessage });
@@ -125,27 +121,15 @@ router.post('/onboard', protect, async (req, res) => {
 // POST /api/auth/resend-welcome
 router.post('/resend-welcome', protect, async (req, res) => {
   try {
-    const result = await Promise.race([
-      sendWelcomeEmail(req.user).catch((mailErr) => {
-        console.error('[email] resend welcome mail error:', mailErr.message);
-        return { sent: false, reason: mailErr.message || 'email-send-error' };
-      }),
-      new Promise((resolve) => setTimeout(
-        () => resolve({ sent: false, reason: 'email-request-timeout' }),
-        22000
-      ))
-    ]);
+    const result = await sendWelcomeEmail(req.user).catch((mailErr) => {
+      console.error('[email] resend welcome mail error:', mailErr.message);
+      return { sent: false, reason: mailErr.message || 'email-send-error' };
+    });
 
     if (result?.sent === false) {
-      if (result.reason === 'email-request-timeout') {
-        queueWelcomeEmail(req.user, 'resend');
-        return res.status(202).json({
-          message: 'Email request queued. SMTP is slow, please check inbox after a few minutes.',
-          reason: result.reason
-        });
-      }
+      queueWelcomeEmail(req.user, 'resend-retry');
       return res.status(400).json({
-        message: 'Could not send welcome email',
+        message: 'Could not send welcome email right now. Retry has been queued.',
         reason: result.reason || 'email-not-sent'
       });
     }

@@ -14,9 +14,12 @@ function createTransport(port, secure) {
     host: EMAIL_HOST,
     port,
     secure,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 100,
+    connectionTimeout: Number(process.env.EMAIL_CONNECTION_TIMEOUT_MS) || 30000,
+    greetingTimeout: Number(process.env.EMAIL_GREETING_TIMEOUT_MS) || 30000,
+    socketTimeout: Number(process.env.EMAIL_SOCKET_TIMEOUT_MS) || 45000,
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS
