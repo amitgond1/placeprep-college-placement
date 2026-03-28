@@ -84,9 +84,21 @@ This repo includes `render.yaml` for easier setup.
 #### Frontend Static Site
 - Root directory: `client`
 - Build command: `npm install && npm run build`
-- Publish directory: `dist`
+- Publish directory: `build`
 - Env var:
   - `VITE_API_BASE_URL=https://<backend-url>.onrender.com/api`
+
+## Registration / Email Troubleshooting (Render)
+
+If "Create account" does not move forward or no email is received:
+
+1. Confirm backend is deployed as a **Web Service** (not static).
+2. Confirm frontend env `VITE_API_BASE_URL` points to backend, for example:
+   - `https://placeprep-api.onrender.com/api`
+3. Confirm backend envs are set:
+   - `MONGO_URI`, `JWT_SECRET`
+   - `CLIENT_URL` = frontend URL
+   - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM` (for sending mail)
 
 ## Notes
 

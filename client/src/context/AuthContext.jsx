@@ -3,6 +3,12 @@ import api from '../services/api';
 
 const AuthContext = createContext(null);
 
+function assertAuthPayload(data) {
+  if (!data?.token || !data?.user) {
+    throw new Error('Server response invalid. Check frontend API URL and backend deployment.');
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,6 +27,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
+    assertAuthPayload(data);
     localStorage.setItem('token', data.token);
     setUser(data.user);
     return data.user;
@@ -28,6 +35,7 @@ export function AuthProvider({ children }) {
 
   const register = async (name, email, password) => {
     const { data } = await api.post('/auth/register', { name, email, password });
+    assertAuthPayload(data);
     localStorage.setItem('token', data.token);
     setUser(data.user);
     return data.user;

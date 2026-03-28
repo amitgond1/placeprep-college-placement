@@ -1,6 +1,23 @@
 import axios from 'axios';
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
+function deriveRenderApiBaseUrl() {
+  if (typeof window === 'undefined') return null;
+  const host = window.location.hostname;
+  if (!host.endsWith('.onrender.com')) return null;
+
+  const mappedHost = host
+    .replace(/-college-placement(?=\.onrender\.com$)/, '-api')
+    .replace(/-web(?=\.onrender\.com$)/, '-api');
+
+  if (mappedHost === host) return null;
+  return `https://${mappedHost}/api`;
+}
+
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  deriveRenderApiBaseUrl() ||
+  '/api';
+
 const api = axios.create({ baseURL: apiBaseUrl });
 
 api.interceptors.request.use(config => {
