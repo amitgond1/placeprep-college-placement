@@ -19,6 +19,14 @@ import Profile from './pages/Profile';
 import Compiler from './pages/Compiler';
 import Layout from './components/Layout';
 
+if (typeof window !== 'undefined') {
+  const pendingPath = sessionStorage.getItem('placeprep_pending_path');
+  if (pendingPath) {
+    sessionStorage.removeItem('placeprep_pending_path');
+    window.history.replaceState(null, '', pendingPath);
+  }
+}
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return (
