@@ -34,9 +34,6 @@ router.post('/register', async (req, res) => {
     const user = await User.create({ name, email, password });
     const token = signToken(user._id);
 
-    // Do not block registration on SMTP/network delays.
-    queueWelcomeEmail(user, 'welcome');
-
     res.status(201).json({
       token,
       user: {
@@ -44,7 +41,7 @@ router.post('/register', async (req, res) => {
         isOnboarded: user.isOnboarded, avatar: user.avatar
       },
       welcomeEmailSent: null,
-      welcomeEmailMessage: 'Welcome email queued'
+      welcomeEmailMessage: 'Welcome email will be sent after onboarding'
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -85,23 +82,41 @@ router.post('/onboard', protect, async (req, res) => {
   try {
     const {
       college, branch, graduationYear, targetPackage,
-      targetCompanies, placementDate, dailyGoal
+      targetCompanies, placementDate, dailyGoal, emailReminders
     } = req.body;
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {
         college, branch, graduationYear, targetPackage,
-        targetCompanies, placementDate, dailyGoal,
+        targetCompanies, placementDate, dailyGoal, emailReminders,
         isOnboarded: true
       },
       { new: true }
     );
 
-    // Send welcome email with full details in background.
-    queueWelcomeEmail(user, 'onboarding');
+    const emailResult = await Promise.race([
+      sendWelcomeEmail(user).catch((mailErr) => {
+        console.error('[email] onboarding welcome mail error:', mailErr.message);
+        return { sent: false, reason: mailErr.message || 'email-send-error' };
+      }),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ sent: false, reason: 'email-request-timeout' }),
+        22000
+      ))
+    ]);
 
-    res.json({ message: 'Onboarding complete', user });
+    let welcomeEmailSent = Boolean(emailResult?.sent);
+    let welcomeEmailMessage = welcomeEmailSent
+      ? 'Welcome email sent successfully'
+      : (emailResult?.reason || 'email-not-sent');
+
+    if (!welcomeEmailSent && emailResult?.reason === 'email-request-timeout') {
+      queueWelcomeEmail(user, 'onboarding-delayed');
+      welcomeEmailMessage = 'Email request timed out, queued in background';
+    }
+
+    res.json({ message: 'Onboarding complete', user, welcomeEmailSent, welcomeEmailMessage });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -111,10 +126,13 @@ router.post('/onboard', protect, async (req, res) => {
 router.post('/resend-welcome', protect, async (req, res) => {
   try {
     const result = await Promise.race([
-      sendWelcomeEmail(req.user),
+      sendWelcomeEmail(req.user).catch((mailErr) => {
+        console.error('[email] resend welcome mail error:', mailErr.message);
+        return { sent: false, reason: mailErr.message || 'email-send-error' };
+      }),
       new Promise((resolve) => setTimeout(
         () => resolve({ sent: false, reason: 'email-request-timeout' }),
-        12000
+        22000
       ))
     ]);
 
@@ -133,7 +151,7 @@ router.post('/resend-welcome', protect, async (req, res) => {
     }
     return res.json({ message: 'Welcome email sent successfully' });
   } catch (err) {
-    console.error('[email] resend welcome mail error:', err.message);
+    console.error('[email] resend welcome unexpected error:', err.message);
     return res.status(500).json({ message: err.message || 'Failed to resend welcome email' });
   }
 });

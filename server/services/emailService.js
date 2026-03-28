@@ -3,23 +3,31 @@ const nodemailer = require('nodemailer');
 const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com';
 const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
 const EMAIL_SECURE = EMAIL_PORT === 465;
+const ALT_EMAIL_PORT = EMAIL_PORT === 465 ? 587 : 465;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 const EMAIL_ENABLED = Boolean(EMAIL_USER && EMAIL_PASS);
 const RETRYABLE_ERROR_SNIPPETS = ['timeout', 'timed out', 'ECONNECTION', 'ETIMEDOUT', 'socket'];
 
-const transporter = nodemailer.createTransport({
-  host: EMAIL_HOST,
-  port: EMAIL_PORT,
-  secure: EMAIL_SECURE,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS
-  }
-});
+function createTransport(port, secure) {
+  return nodemailer.createTransport({
+    host: EMAIL_HOST,
+    port,
+    secure,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS
+    }
+  });
+}
+
+const transporter = createTransport(EMAIL_PORT, EMAIL_SECURE);
+const fallbackTransporter = EMAIL_HOST.includes('gmail')
+  ? createTransport(ALT_EMAIL_PORT, ALT_EMAIL_PORT === 465)
+  : null;
 
 const FROM = EMAIL_USER
   ? `PlacePrep <${EMAIL_USER}>`
@@ -29,6 +37,11 @@ if (EMAIL_ENABLED) {
   transporter.verify()
     .then(() => console.log(`[email] SMTP ready on ${EMAIL_HOST}:${EMAIL_PORT}`))
     .catch((err) => console.error('[email] SMTP verify failed:', err.message));
+  if (fallbackTransporter) {
+    fallbackTransporter.verify()
+      .then(() => console.log(`[email] SMTP fallback ready on ${EMAIL_HOST}:${ALT_EMAIL_PORT}`))
+      .catch((err) => console.warn('[email] SMTP fallback verify failed:', err.message));
+  }
 } else {
   console.warn('[email] Disabled: EMAIL_USER / EMAIL_PASS missing');
 }
@@ -42,11 +55,20 @@ function isRetryableMailError(error) {
 
 async function sendMailWithRetry(mailOptions, retries = 2) {
   let lastError = null;
+  let usedFallback = false;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      return await transporter.sendMail(mailOptions);
+      const activeTransporter = usedFallback ? fallbackTransporter : transporter;
+      return await activeTransporter.sendMail(mailOptions);
     } catch (error) {
       lastError = error;
+
+      if (!usedFallback && fallbackTransporter && isRetryableMailError(error)) {
+        usedFallback = true;
+        console.warn(`[email] primary SMTP failed, switching to fallback port ${ALT_EMAIL_PORT}`);
+        continue;
+      }
+
       if (attempt >= retries || !isRetryableMailError(error)) break;
       const waitMs = 800 * (attempt + 1);
       console.warn(`[email] retrying sendMail in ${waitMs}ms (${attempt + 1}/${retries})`);

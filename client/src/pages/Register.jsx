@@ -81,7 +81,7 @@ export default function Register() {
         toast.error(`Email not sent yet (${reason}). You can continue and resend later.`);
       } else {
         toast.success("Account created! Let's set up your profile.");
-        toast('Welcome email is queued. Check inbox/spam in a few minutes.', {
+        toast("Welcome email will be sent after you click Let's Go in onboarding.", {
           icon: '📨',
         });
       }

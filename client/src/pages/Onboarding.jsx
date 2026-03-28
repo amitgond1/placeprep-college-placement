@@ -39,7 +39,14 @@ export default function Onboarding() {
     try {
       const { data } = await api.post('/auth/onboard', form);
       updateUser(data.user);
-      toast.success('Welcome to PlacePrep!');
+      if (data?.welcomeEmailSent) {
+        toast.success('Welcome to PlacePrep! Welcome email sent.');
+      } else if (data?.welcomeEmailMessage) {
+        toast.success('Welcome to PlacePrep!');
+        toast.error(`Email status: ${data.welcomeEmailMessage}`);
+      } else {
+        toast.success('Welcome to PlacePrep!');
+      }
       navigate('/dashboard');
     } catch (e) {
       toast.error(e.response?.data?.message || 'Something went wrong');
