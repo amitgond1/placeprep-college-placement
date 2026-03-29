@@ -111,29 +111,54 @@ Return a JSON object:
 
 // ATS Check
 async function checkATS(resumeText, jobDescription) {
-  const system = `You are an expert ATS (Applicant Tracking System) analyzer. Return valid JSON only.`;
-  const prompt = `Analyze this resume against the job description for ATS compatibility.
+  const system = `You are a senior ATS (Applicant Tracking System) expert and resume coach with 10+ years of experience reviewing resumes for top tech companies. You analyze resumes with the precision of actual ATS software. Return valid JSON only — no explanation outside JSON.`;
+
+  const prompt = `Perform a comprehensive, accurate ATS analysis of this resume against the job description.
 
 JOB DESCRIPTION:
-${jobDescription.substring(0, 2000)}
+${jobDescription.substring(0, 2500)}
 
-RESUME:
-${resumeText.substring(0, 3000)}
+RESUME TEXT:
+${resumeText.substring(0, 4000)}
 
-Return a JSON object:
+INSTRUCTIONS FOR ACCURATE SCORING:
+1. Extract ALL technical keywords, tools, technologies, skills, and soft skills from the JD
+2. Check EXACT and PARTIAL matches in resume (case-insensitive)
+3. Score breakdown:
+   - Keyword match rate (40 points max): (matched/total_required) * 40
+   - Skills section completeness (20 points max): technical stack coverage
+   - Experience quality (20 points max): action verbs, quantified achievements, relevance
+   - Formatting/structure (10 points max): standard sections, ATS-parseable format
+   - Education match (10 points max): degree requirements met
+4. Be precise — do not inflate scores. A score of 50-65 means moderate match, 75+ is strong.
+
+Return this exact JSON structure:
 {
-  "score": <0-100 number>,
-  "matchedKeywords": ["<keyword1>", "<keyword2>", ...],
-  "missingKeywords": ["<keyword1>", "<keyword2>", ...],
+  "score": <calculated integer 0-100>,
+  "keywordMatchRate": <percentage 0-100>,
+  "matchedKeywords": ["<each exact keyword found in both JD and resume>"],
+  "missingKeywords": ["<important JD keywords NOT found in resume>"],
+  "skillsGap": ["<specific technical skills JD requires that resume lacks>"],
   "sectionFeedback": {
-    "summary": "<feedback>",
-    "experience": "<feedback>",
-    "skills": "<feedback>",
-    "education": "<feedback>",
-    "formatting": "<feedback>"
+    "summary": "<specific actionable feedback on summary/objective section>",
+    "experience": "<feedback on experience bullets — action verbs, metrics, relevance>",
+    "skills": "<feedback on skills section completeness and organization>",
+    "education": "<feedback on education section match>",
+    "formatting": "<ATS formatting issues — tables, columns, graphics, fonts>"
   },
-  "rewriteSuggestions": ["<suggestion1>", "<suggestion2>", ...],
-  "actionVerbStrength": "<weak|moderate|strong>"
+  "rewriteSuggestions": [
+    "<specific rewrite suggestion with example>",
+    "<specific rewrite suggestion with example>",
+    "<specific rewrite suggestion with example>"
+  ],
+  "actionVerbStrength": "<weak|moderate|strong>",
+  "quantifiedAchievements": <number of bullet points with numbers/metrics found>,
+  "topImprovements": [
+    "<single most impactful change to increase score>",
+    "<second most impactful change>",
+    "<third most impactful change>"
+  ],
+  "compatibilityVerdict": "<Not Compatible|Needs Work|Good Match|Strong Match>"
 }`;
 
   try {
@@ -142,10 +167,14 @@ Return a JSON object:
     return JSON.parse(jsonMatch[0]);
   } catch {
     return {
-      score: 60, matchedKeywords: [], missingKeywords: [],
+      score: 60, keywordMatchRate: 50,
+      matchedKeywords: [], missingKeywords: [], skillsGap: [],
       sectionFeedback: { summary: 'Could not analyze', experience: '', skills: '', education: '', formatting: '' },
-      rewriteSuggestions: ['Add more keywords from the JD'],
-      actionVerbStrength: 'moderate'
+      rewriteSuggestions: ['Add more keywords from the JD', 'Quantify your achievements', 'Use standard section headers'],
+      actionVerbStrength: 'moderate',
+      quantifiedAchievements: 0,
+      topImprovements: ['Add missing keywords', 'Quantify achievements', 'Match skills to JD'],
+      compatibilityVerdict: 'Needs Work'
     };
   }
 }

@@ -39,7 +39,16 @@ const userSchema = new mongoose.Schema({
   weeklyReport: { type: Boolean, default: true },
 
   isOnboarded: { type: Boolean, default: false },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+
+  // Daily Challenges
+  dailyChallenges: [{
+    date: { type: String },          // 'YYYY-MM-DD'
+    dsaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
+    aptitudeId: { type: mongoose.Schema.Types.ObjectId, ref: 'AptitudeQuestion' },
+    completedDsa: { type: Boolean, default: false },
+    completedAptitude: { type: Boolean, default: false }
+  }]
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {

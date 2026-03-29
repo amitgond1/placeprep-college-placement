@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, Download, Zap, User, GraduationCap, Code2, FolderOpen,
   Briefcase, Award, Trophy, ChevronDown, ChevronUp, Plus, Trash2,
-  CheckCircle, XCircle, Building2, Loader2, Eye, Edit3,
+  CheckCircle, XCircle, Building2, Loader2, Eye, Edit3, Upload, FileUp,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -78,129 +78,236 @@ function ScoreGauge({ score }) {
   );
 }
 
-/* ─── Resume Preview ────────────────────────────────────────────────────────── */
-function ResumePreview({ data }) {
-  const { personal, education, skills, projects, experience, certifications, achievements } = data;
+/* ─── Resume Templates ──────────────────────────────────────────────────────── */
+export const RESUME_TEMPLATES = [
+  { id: 'classic',   label: 'Classic',   desc: 'Traditional serif — timeless & formal' },
+  { id: 'modern',    label: 'Modern',    desc: 'Blue accent, clean sans-serif' },
+  { id: 'minimal',   label: 'Minimal',   desc: 'Ultra-clean, lots of whitespace' },
+  { id: 'technical', label: 'Technical', desc: 'Two-column with skills sidebar' },
+  { id: 'executive', label: 'Executive', desc: 'Dark header, bold & professional' },
+];
+
+function Bullet({ text, color = '#374151' }) {
   return (
-    <div id="resume-preview" className="bg-white text-gray-900 p-8 text-sm leading-relaxed font-sans min-h-full"
-      style={{ fontFamily: 'Georgia, serif' }}>
-      {/* Header */}
+    <div className="flex gap-1 text-xs" style={{ color }}>
+      <span className="shrink-0 mt-0.5">•</span>
+      <span>{text.replace(/^[-•]\s*/, '')}</span>
+    </div>
+  );
+}
+
+function ResumePreview({ data, template = 'classic' }) {
+  const { personal, education, skills, projects, experience, certifications, achievements } = data;
+
+  /* ── CLASSIC ── */
+  if (template === 'classic') return (
+    <div id="resume-preview" className="bg-white text-gray-900 p-8 text-sm leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
       <div className="text-center border-b-2 border-gray-800 pb-3 mb-4">
         <h1 className="text-2xl font-bold tracking-wide uppercase">{personal.name || 'Your Name'}</h1>
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-600">
-          {personal.email && <span>{personal.email}</span>}
-          {personal.phone && <span>{personal.phone}</span>}
-          {personal.location && <span>{personal.location}</span>}
-          {personal.linkedin && <span>{personal.linkedin}</span>}
-          {personal.github && <span>{personal.github}</span>}
-          {personal.portfolio && <span>{personal.portfolio}</span>}
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5 mt-1 text-xs text-gray-600">
+          {[personal.email, personal.phone, personal.location, personal.linkedin, personal.github, personal.portfolio].filter(Boolean).map((v, i) => <span key={i}>{v}</span>)}
         </div>
       </div>
+      {personal.summary && <Section h="Objective"><p className="text-xs text-gray-700">{personal.summary}</p></Section>}
+      {education.some(e => e.institution) && <Section h="Education">{education.filter(e => e.institution).map(e => <EduRow key={e.id} e={e} />)}</Section>}
+      {skills.some(s => s.category) && <Section h="Technical Skills">{skills.filter(s => s.category).map(s => <div key={s.id} className="flex gap-2 text-xs mb-0.5"><span className="font-semibold min-w-[100px]">{s.category}:</span><span className="text-gray-700">{s.items}</span></div>)}</Section>}
+      {experience.some(e => e.company) && <Section h="Experience">{experience.filter(e => e.company).map(e => <ExpRow key={e.id} e={e} />)}</Section>}
+      {projects.some(p => p.title) && <Section h="Projects">{projects.filter(p => p.title).map(p => <ProjRow key={p.id} p={p} />)}</Section>}
+      {certifications.some(c => c.name) && <Section h="Certifications">{certifications.filter(c => c.name).map(c => <div key={c.id} className="flex justify-between text-xs mb-0.5"><span><b>{c.name}</b>{c.issuer ? ` — ${c.issuer}` : ''}</span><span className="text-gray-500">{c.date}</span></div>)}</Section>}
+      {achievements.some(a => a.title) && <Section h="Achievements">{achievements.filter(a => a.title).map(a => <Bullet key={a.id} text={`${a.title}${a.description ? ': ' + a.description : ''}`} />)}</Section>}
+    </div>
+  );
 
-      {/* Summary */}
-      {personal.summary && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-1">Objective</h2>
-          <p className="text-xs text-gray-700">{personal.summary}</p>
+  /* ── MODERN ── */
+  if (template === 'modern') return (
+    <div id="resume-preview" className="bg-white text-gray-900 text-sm leading-relaxed" style={{ fontFamily: 'system-ui, sans-serif' }}>
+      <div className="px-8 py-6" style={{ borderLeft: '5px solid #2563eb' }}>
+        <h1 className="text-2xl font-black text-blue-700 tracking-tight">{personal.name || 'Your Name'}</h1>
+        <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5 text-xs text-gray-500">
+          {[personal.email, personal.phone, personal.location, personal.linkedin, personal.github].filter(Boolean).map((v, i) => <span key={i}>{v}</span>)}
         </div>
-      )}
+        {personal.summary && <p className="text-xs text-gray-600 mt-2 max-w-2xl">{personal.summary}</p>}
+      </div>
+      <div className="px-8 pb-8 space-y-4 mt-2">
+        {education.some(e => e.institution) && <ModSection label="Education" color="#2563eb">{education.filter(e => e.institution).map(e => <EduRow key={e.id} e={e} />)}</ModSection>}
+        {skills.some(s => s.category) && <ModSection label="Skills" color="#2563eb">{skills.filter(s => s.category).map(s => <div key={s.id} className="flex gap-2 text-xs mb-0.5"><span className="font-bold text-blue-700 min-w-[90px]">{s.category}:</span><span className="text-gray-700">{s.items}</span></div>)}</ModSection>}
+        {experience.some(e => e.company) && <ModSection label="Experience" color="#2563eb">{experience.filter(e => e.company).map(e => <ExpRow key={e.id} e={e} accent="#2563eb" />)}</ModSection>}
+        {projects.some(p => p.title) && <ModSection label="Projects" color="#2563eb">{projects.filter(p => p.title).map(p => <ProjRow key={p.id} p={p} accent="#2563eb" />)}</ModSection>}
+        {certifications.some(c => c.name) && <ModSection label="Certifications" color="#2563eb">{certifications.filter(c => c.name).map(c => <div key={c.id} className="flex justify-between text-xs mb-0.5"><span><b>{c.name}</b>{c.issuer ? ` — ${c.issuer}` : ''}</span><span className="text-gray-500">{c.date}</span></div>)}</ModSection>}
+        {achievements.some(a => a.title) && <ModSection label="Achievements" color="#2563eb">{achievements.filter(a => a.title).map(a => <Bullet key={a.id} text={`${a.title}${a.description ? ': ' + a.description : ''}`} />)}</ModSection>}
+      </div>
+    </div>
+  );
 
-      {/* Education */}
-      {education.some(e => e.institution) && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">Education</h2>
-          {education.filter(e => e.institution).map(e => (
-            <div key={e.id} className="flex justify-between mb-1">
-              <div>
-                <span className="font-semibold text-xs">{e.institution}</span>
-                {e.degree && <span className="text-xs text-gray-600"> — {e.degree}{e.branch ? `, ${e.branch}` : ''}</span>}
-                {e.relevant && <div className="text-xs text-gray-500 italic">Relevant: {e.relevant}</div>}
+  /* ── MINIMAL ── */
+  if (template === 'minimal') return (
+    <div id="resume-preview" className="bg-white text-gray-900 p-10 text-sm leading-relaxed" style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}>
+      <div className="mb-8">
+        <h1 className="text-3xl font-light tracking-widest uppercase text-gray-800">{personal.name || 'Your Name'}</h1>
+        <div className="w-12 h-0.5 bg-gray-300 mt-2 mb-3" />
+        <div className="flex flex-wrap gap-x-5 gap-y-0.5 text-xs text-gray-400">
+          {[personal.email, personal.phone, personal.location, personal.linkedin, personal.github].filter(Boolean).map((v, i) => <span key={i}>{v}</span>)}
+        </div>
+        {personal.summary && <p className="text-xs text-gray-500 mt-3 leading-relaxed">{personal.summary}</p>}
+      </div>
+      {education.some(e => e.institution) && <MinSection label="EDUCATION">{education.filter(e => e.institution).map(e => <EduRow key={e.id} e={e} />)}</MinSection>}
+      {skills.some(s => s.category) && <MinSection label="SKILLS">{skills.filter(s => s.category).map(s => <div key={s.id} className="flex gap-3 text-xs mb-1"><span className="text-gray-400 min-w-[90px] uppercase text-[10px] tracking-wider pt-0.5">{s.category}</span><span className="text-gray-700">{s.items}</span></div>)}</MinSection>}
+      {experience.some(e => e.company) && <MinSection label="EXPERIENCE">{experience.filter(e => e.company).map(e => <ExpRow key={e.id} e={e} />)}</MinSection>}
+      {projects.some(p => p.title) && <MinSection label="PROJECTS">{projects.filter(p => p.title).map(p => <ProjRow key={p.id} p={p} />)}</MinSection>}
+      {certifications.some(c => c.name) && <MinSection label="CERTIFICATIONS">{certifications.filter(c => c.name).map(c => <div key={c.id} className="flex justify-between text-xs mb-0.5"><span><b>{c.name}</b>{c.issuer ? ` — ${c.issuer}` : ''}</span><span className="text-gray-400">{c.date}</span></div>)}</MinSection>}
+      {achievements.some(a => a.title) && <MinSection label="ACHIEVEMENTS">{achievements.filter(a => a.title).map(a => <Bullet key={a.id} text={`${a.title}${a.description ? ': ' + a.description : ''}`} color="#6b7280" />)}</MinSection>}
+    </div>
+  );
+
+  /* ── TECHNICAL (two-column) ── */
+  if (template === 'technical') return (
+    <div id="resume-preview" className="bg-white text-gray-900 text-sm leading-relaxed flex" style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100%' }}>
+      {/* Left sidebar */}
+      <div className="w-48 flex-shrink-0 p-5 space-y-4" style={{ background: '#1e293b', color: '#cbd5e1' }}>
+        <div>
+          <div className="text-base font-black text-white leading-tight">{personal.name || 'Your Name'}</div>
+          <div className="w-8 h-0.5 bg-cyan-400 mt-2" />
+        </div>
+        <div className="space-y-1 text-[10px]">
+          {personal.email && <div className="break-all">{personal.email}</div>}
+          {personal.phone && <div>{personal.phone}</div>}
+          {personal.location && <div>{personal.location}</div>}
+          {personal.linkedin && <div className="break-all">{personal.linkedin}</div>}
+          {personal.github && <div className="break-all">{personal.github}</div>}
+        </div>
+        {skills.some(s => s.category) && (
+          <div>
+            <div className="text-[9px] uppercase tracking-widest text-cyan-400 mb-2">Skills</div>
+            {skills.filter(s => s.category).map(s => (
+              <div key={s.id} className="mb-2">
+                <div className="text-[9px] font-bold text-slate-300 uppercase">{s.category}</div>
+                <div className="text-[10px] text-slate-400 leading-relaxed">{s.items}</div>
               </div>
-              <div className="text-right text-xs text-gray-600">
-                {e.year && <div>{e.year}</div>}
-                {e.cgpa && <div>CGPA: {e.cgpa}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+        {certifications.some(c => c.name) && (
+          <div>
+            <div className="text-[9px] uppercase tracking-widest text-cyan-400 mb-2">Certifications</div>
+            {certifications.filter(c => c.name).map(c => (
+              <div key={c.id} className="text-[10px] mb-1 text-slate-300">{c.name}{c.date ? ` (${c.date})` : ''}</div>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Right content */}
+      <div className="flex-1 p-6 space-y-4">
+        {personal.summary && <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded border-l-2 border-cyan-500">{personal.summary}</div>}
+        {education.some(e => e.institution) && <TechSection label="Education">{education.filter(e => e.institution).map(e => <EduRow key={e.id} e={e} />)}</TechSection>}
+        {experience.some(e => e.company) && <TechSection label="Experience">{experience.filter(e => e.company).map(e => <ExpRow key={e.id} e={e} accent="#0891b2" />)}</TechSection>}
+        {projects.some(p => p.title) && <TechSection label="Projects">{projects.filter(p => p.title).map(p => <ProjRow key={p.id} p={p} accent="#0891b2" />)}</TechSection>}
+        {achievements.some(a => a.title) && <TechSection label="Achievements">{achievements.filter(a => a.title).map(a => <Bullet key={a.id} text={`${a.title}${a.description ? ': ' + a.description : ''}`} />)}</TechSection>}
+      </div>
+    </div>
+  );
 
-      {/* Skills */}
-      {skills.some(s => s.category) && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">Technical Skills</h2>
-          {skills.filter(s => s.category).map(s => (
-            <div key={s.id} className="flex gap-2 text-xs mb-0.5">
-              <span className="font-semibold min-w-[100px]">{s.category}:</span>
-              <span className="text-gray-700">{s.items}</span>
-            </div>
-          ))}
+  /* ── EXECUTIVE ── */
+  return (
+    <div id="resume-preview" className="bg-white text-gray-900 text-sm leading-relaxed" style={{ fontFamily: '"Times New Roman", serif' }}>
+      <div className="px-8 py-6 text-white" style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}>
+        <h1 className="text-2xl font-bold tracking-wider uppercase">{personal.name || 'Your Name'}</h1>
+        <div className="flex flex-wrap gap-x-5 gap-y-0.5 mt-2 text-xs text-gray-300">
+          {[personal.email, personal.phone, personal.location, personal.linkedin, personal.github].filter(Boolean).map((v, i) => <span key={i}>{v}</span>)}
         </div>
-      )}
+        {personal.summary && <p className="text-xs text-gray-300 mt-3 leading-relaxed border-t border-white/20 pt-3">{personal.summary}</p>}
+      </div>
+      <div className="px-8 py-6 space-y-4">
+        {education.some(e => e.institution) && <ExecSection label="Education">{education.filter(e => e.institution).map(e => <EduRow key={e.id} e={e} />)}</ExecSection>}
+        {skills.some(s => s.category) && <ExecSection label="Technical Skills">{skills.filter(s => s.category).map(s => <div key={s.id} className="flex gap-2 text-xs mb-0.5"><span className="font-bold min-w-[100px]">{s.category}:</span><span className="text-gray-700">{s.items}</span></div>)}</ExecSection>}
+        {experience.some(e => e.company) && <ExecSection label="Professional Experience">{experience.filter(e => e.company).map(e => <ExpRow key={e.id} e={e} accent="#1a1a2e" />)}</ExecSection>}
+        {projects.some(p => p.title) && <ExecSection label="Key Projects">{projects.filter(p => p.title).map(p => <ProjRow key={p.id} p={p} accent="#1a1a2e" />)}</ExecSection>}
+        {certifications.some(c => c.name) && <ExecSection label="Certifications">{certifications.filter(c => c.name).map(c => <div key={c.id} className="flex justify-between text-xs mb-0.5"><span><b>{c.name}</b>{c.issuer ? ` — ${c.issuer}` : ''}</span><span className="text-gray-500">{c.date}</span></div>)}</ExecSection>}
+        {achievements.some(a => a.title) && <ExecSection label="Achievements">{achievements.filter(a => a.title).map(a => <Bullet key={a.id} text={`${a.title}${a.description ? ': ' + a.description : ''}`} />)}</ExecSection>}
+      </div>
+    </div>
+  );
+}
 
-      {/* Experience */}
-      {experience.some(e => e.company) && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">Experience</h2>
-          {experience.filter(e => e.company).map(e => (
-            <div key={e.id} className="mb-2">
-              <div className="flex justify-between">
-                <span className="font-semibold text-xs">{e.role}</span>
-                <span className="text-xs text-gray-600">{e.duration}</span>
-              </div>
-              <div className="text-xs text-gray-600 italic mb-1">{e.company}</div>
-              {e.points && e.points.split('\n').filter(Boolean).map((p, i) => (
-                <div key={i} className="text-xs text-gray-700 flex gap-1"><span>•</span><span>{p.replace(/^[-•]\s*/, '')}</span></div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Projects */}
-      {projects.some(p => p.title) && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">Projects</h2>
-          {projects.filter(p => p.title).map(p => (
-            <div key={p.id} className="mb-2">
-              <div className="flex justify-between">
-                <span className="font-semibold text-xs">{p.title}</span>
-                {p.link && <span className="text-xs text-blue-600">{p.link}</span>}
-              </div>
-              {p.tech && <div className="text-xs text-gray-500 italic mb-0.5">Tech: {p.tech}</div>}
-              {p.description && p.description.split('\n').filter(Boolean).map((d, i) => (
-                <div key={i} className="text-xs text-gray-700 flex gap-1"><span>•</span><span>{d.replace(/^[-•]\s*/, '')}</span></div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Certifications */}
-      {certifications.some(c => c.name) && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">Certifications</h2>
-          {certifications.filter(c => c.name).map(c => (
-            <div key={c.id} className="flex justify-between text-xs mb-0.5">
-              <span><span className="font-semibold">{c.name}</span>{c.issuer ? ` — ${c.issuer}` : ''}</span>
-              <span className="text-gray-600">{c.date}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Achievements */}
-      {achievements.some(a => a.title) && (
-        <div className="mb-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">Achievements</h2>
-          {achievements.filter(a => a.title).map(a => (
-            <div key={a.id} className="flex gap-1 text-xs mb-0.5">
-              <span>•</span>
-              <span><span className="font-semibold">{a.title}</span>{a.description ? `: ${a.description}` : ''}</span>
-            </div>
-          ))}
-        </div>
-      )}
+/* ── Section helpers ── */
+function Section({ h, children }) {
+  return (
+    <div className="mb-4">
+      <h2 className="text-xs font-bold uppercase tracking-widest border-b border-gray-400 mb-2">{h}</h2>
+      {children}
+    </div>
+  );
+}
+function ModSection({ label, color, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <div className="text-xs font-black uppercase tracking-widest" style={{ color }}>{label}</div>
+        <div className="flex-1 h-px" style={{ background: color, opacity: 0.3 }} />
+      </div>
+      {children}
+    </div>
+  );
+}
+function MinSection({ label, children }) {
+  return (
+    <div className="mb-6">
+      <div className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-3">{label}</div>
+      {children}
+    </div>
+  );
+}
+function TechSection({ label, children }) {
+  return (
+    <div>
+      <div className="text-xs font-bold uppercase tracking-wider text-cyan-600 border-b border-cyan-100 pb-1 mb-2">{label}</div>
+      {children}
+    </div>
+  );
+}
+function ExecSection({ label, children }) {
+  return (
+    <div className="mb-4">
+      <div className="text-xs font-bold uppercase tracking-widest mb-2 pb-1" style={{ color: '#1a1a2e', borderBottom: '2px solid #1a1a2e' }}>{label}</div>
+      {children}
+    </div>
+  );
+}
+function EduRow({ e }) {
+  return (
+    <div className="flex justify-between mb-1.5">
+      <div>
+        <span className="font-semibold text-xs">{e.institution}</span>
+        {e.degree && <span className="text-xs text-gray-600"> — {e.degree}{e.branch ? `, ${e.branch}` : ''}</span>}
+        {e.relevant && <div className="text-xs text-gray-500 italic">Relevant: {e.relevant}</div>}
+      </div>
+      <div className="text-right text-xs text-gray-600 shrink-0 ml-2">
+        {e.year && <div>{e.year}</div>}
+        {e.cgpa && <div>CGPA: {e.cgpa}</div>}
+      </div>
+    </div>
+  );
+}
+function ExpRow({ e, accent }) {
+  return (
+    <div className="mb-2">
+      <div className="flex justify-between">
+        <span className="font-semibold text-xs" style={accent ? { color: accent } : {}}>{e.role}</span>
+        <span className="text-xs text-gray-500">{e.duration}</span>
+      </div>
+      <div className="text-xs text-gray-500 italic mb-1">{e.company}</div>
+      {e.points && e.points.split('\n').filter(Boolean).map((p, i) => <Bullet key={i} text={p} />)}
+    </div>
+  );
+}
+function ProjRow({ p, accent }) {
+  return (
+    <div className="mb-2">
+      <div className="flex justify-between">
+        <span className="font-semibold text-xs" style={accent ? { color: accent } : {}}>{p.title}</span>
+        {p.link && <span className="text-xs text-blue-500 shrink-0 ml-2">{p.link}</span>}
+      </div>
+      {p.tech && <div className="text-xs text-gray-500 italic mb-0.5">Stack: {p.tech}</div>}
+      {p.description && p.description.split('\n').filter(Boolean).map((d, i) => <Bullet key={i} text={d} />)}
     </div>
   );
 }
@@ -219,12 +326,19 @@ export default function ResumeBuilder() {
   const [certifications, setCertifications] = useState([emptyCertification()]);
   const [achievements, setAchievements] = useState([emptyAchievement()]);
 
+  const [template, setTemplate] = useState('classic');
+
   // ATS state
   const [jobDesc, setJobDesc] = useState('');
   const [atsLoading, setAtsLoading] = useState(false);
   const [atsResult, setAtsResult] = useState(null);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [optimizeCompany, setOptimizeCompany] = useState('');
+  // Resume upload state
+  const [uploadedText, setUploadedText] = useState('');
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadFilename, setUploadFilename] = useState('');
+  const uploadRef = useRef();
 
   const resumeData = { personal, education, skills, projects, experience, certifications, achievements };
 
@@ -261,11 +375,36 @@ export default function ResumeBuilder() {
     document.title = prev;
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append('resume', file);
+      const { data } = await api.post('/resume/parse-upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setUploadedText(data.text);
+      setUploadFilename(data.filename);
+      toast.success(`Extracted text from ${data.filename}`);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to parse resume file');
+    } finally {
+      setUploadLoading(false);
+      e.target.value = '';
+    }
+  };
+
   const handleAtsCheck = async () => {
     if (!jobDesc.trim()) { toast.error('Please enter a job description.'); return; }
     setAtsLoading(true);
     try {
-      const { data } = await api.post('/resume/ats-check', { resume: resumeData, jobDescription: jobDesc });
+      // Use uploaded text if available, otherwise use builder data
+      const payload = uploadedText
+        ? { jobDescription: jobDesc, resumeText: uploadedText }
+        : { jobDescription: jobDesc, resume: resumeData };
+      const { data } = await api.post('/resume/ats-check', payload);
       setAtsResult(data);
     } catch {
       toast.error('ATS check failed. Please try again.');
@@ -486,11 +625,65 @@ export default function ResumeBuilder() {
                   {/* ── ATS Checker ── */}
                   {activeTab === 'ats' && (
                     <div className="space-y-5">
+
+                      {/* Upload existing resume */}
+                      <div className="card">
+                        <div className="flex items-center gap-2 mb-3">
+                          <FileUp className="w-5 h-5 text-purple-400" />
+                          <h3 className="font-semibold text-[var(--text-primary)]">Upload Your Existing Resume</h3>
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] mb-3">Upload a PDF, DOCX, or TXT resume to check its ATS score against a job description.</p>
+
+                        <input ref={uploadRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleFileUpload} />
+
+                        {uploadedText ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>
+                              <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-medium text-green-400 truncate">{uploadFilename}</div>
+                                <div className="text-xs text-[var(--text-secondary)]">{uploadedText.length} characters extracted</div>
+                              </div>
+                              <button onClick={() => { setUploadedText(''); setUploadFilename(''); }}
+                                className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}>
+                                Remove
+                              </button>
+                            </div>
+                            <div className="max-h-32 overflow-y-auto p-3 rounded-lg text-xs font-mono"
+                              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
+                              {uploadedText.substring(0, 400)}{uploadedText.length > 400 ? '…' : ''}
+                            </div>
+                          </div>
+                        ) : (
+                          <button onClick={() => uploadRef.current?.click()} disabled={uploadLoading}
+                            className="w-full flex flex-col items-center gap-2 py-6 rounded-xl border-2 border-dashed transition-colors hover:border-purple-500/50"
+                            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+                            {uploadLoading
+                              ? <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+                              : <Upload className="w-8 h-8 text-purple-400" />}
+                            <div className="text-sm font-medium">{uploadLoading ? 'Extracting text…' : 'Click to upload resume'}</div>
+                            <div className="text-xs">PDF, DOCX, or TXT · Max 5MB</div>
+                          </button>
+                        )}
+
+                        {!uploadedText && (
+                          <p className="text-xs text-center mt-2 text-[var(--text-secondary)]">
+                            — or use the resume you are building above —
+                          </p>
+                        )}
+                      </div>
+
+                      {/* ATS check */}
                       <div className="card">
                         <div className="flex items-center gap-2 mb-3">
                           <Zap className="w-5 h-5 text-yellow-400" />
                           <h3 className="font-semibold text-[var(--text-primary)]">ATS Score Checker</h3>
                         </div>
+                        {uploadedText && (
+                          <div className="mb-3 text-xs px-3 py-2 rounded-lg" style={{ background: 'rgba(124,58,237,0.1)', color: '#7c3aed' }}>
+                            ✓ Will check uploaded resume: <strong>{uploadFilename}</strong>
+                          </div>
+                        )}
                         <Textarea label="Paste Job Description" value={jobDesc} onChange={setJobDesc}
                           placeholder="We are looking for a Software Development Engineer with strong DSA skills, experience in Java/Python…" rows={7} />
                         <div className="flex gap-2 mt-3">
@@ -503,13 +696,45 @@ export default function ResumeBuilder() {
 
                       {atsResult && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                          {/* Score gauge */}
+                          {/* Score gauge + verdict */}
                           <div className="card flex flex-col items-center gap-3">
                             <ScoreGauge score={atsResult.score ?? 0} />
-                            <p className="text-sm text-[var(--text-secondary)] text-center max-w-xs">
-                              {(atsResult.score ?? 0) >= 75 ? 'Great match! Your resume is well aligned.' : (atsResult.score ?? 0) >= 50 ? 'Moderate match. Add more relevant keywords.' : 'Low match. Significant optimisation needed.'}
-                            </p>
+                            {atsResult.compatibilityVerdict && (
+                              <span className="px-3 py-1 rounded-full text-xs font-bold"
+                                style={{
+                                  background: atsResult.compatibilityVerdict === 'Strong Match' ? 'rgba(34,197,94,0.15)' : atsResult.compatibilityVerdict === 'Good Match' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                                  color: atsResult.compatibilityVerdict === 'Strong Match' ? '#22c55e' : atsResult.compatibilityVerdict === 'Good Match' ? '#f59e0b' : '#ef4444'
+                                }}>
+                                {atsResult.compatibilityVerdict}
+                              </span>
+                            )}
+                            <div className="grid grid-cols-2 gap-3 w-full text-center">
+                              <div className="p-2 rounded-lg" style={{ background: 'var(--bg-primary)' }}>
+                                <div className="text-base font-black text-purple-400">{atsResult.keywordMatchRate ?? '—'}%</div>
+                                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Keyword Match</div>
+                              </div>
+                              <div className="p-2 rounded-lg" style={{ background: 'var(--bg-primary)' }}>
+                                <div className="text-base font-black text-cyan-400">{atsResult.quantifiedAchievements ?? 0}</div>
+                                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Quantified Points</div>
+                              </div>
+                            </div>
                           </div>
+
+                          {/* Top improvements */}
+                          {atsResult.topImprovements?.length > 0 && (
+                            <div className="card">
+                              <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">🎯 Top Improvements</h4>
+                              <div className="space-y-2">
+                                {atsResult.topImprovements.map((tip, i) => (
+                                  <div key={i} className="flex items-start gap-2 text-xs">
+                                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 font-bold text-[10px]"
+                                      style={{ background: i === 0 ? '#ef4444' : i === 1 ? '#f59e0b' : '#22c55e' }}>{i + 1}</span>
+                                    <span style={{ color: 'var(--text-secondary)' }}>{tip}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Keywords */}
                           <div className="card">
@@ -525,11 +750,21 @@ export default function ResumeBuilder() {
                               </div>
                             )}
                             {atsResult.missingKeywords?.length > 0 && (
-                              <div>
-                                <p className="text-xs text-red-400 font-medium mb-2 flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> Missing ({atsResult.missingKeywords.length})</p>
+                              <div className="mb-3">
+                                <p className="text-xs text-red-400 font-medium mb-2 flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> Missing Keywords ({atsResult.missingKeywords.length})</p>
                                 <div className="flex flex-wrap gap-2">
                                   {atsResult.missingKeywords.map(kw => (
                                     <span key={kw} className="px-2 py-1 rounded-full text-xs font-medium bg-red-500/15 text-red-400 border border-red-500/30">{kw}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {atsResult.skillsGap?.length > 0 && (
+                              <div>
+                                <p className="text-xs text-orange-400 font-medium mb-2">⚠ Skills Gap</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {atsResult.skillsGap.map(sk => (
+                                    <span key={sk} className="px-2 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}>{sk}</span>
                                   ))}
                                 </div>
                               </div>
@@ -540,7 +775,7 @@ export default function ResumeBuilder() {
                           {atsResult.sectionFeedback && (
                             <div className="card space-y-2">
                               <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Section Feedback</h4>
-                              {Object.entries(atsResult.sectionFeedback).map(([section, feedback]) => (
+                              {Object.entries(atsResult.sectionFeedback).map(([section, feedback]) => feedback ? (
                                 <div key={section} className="border border-[var(--border)] rounded-lg overflow-hidden">
                                   <button onClick={() => setOpenAccordion(openAccordion === section ? null : section)}
                                     className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-white/5 transition-colors">
@@ -555,7 +790,21 @@ export default function ResumeBuilder() {
                                     )}
                                   </AnimatePresence>
                                 </div>
-                              ))}
+                              ) : null)}
+                            </div>
+                          )}
+
+                          {/* Rewrite suggestions */}
+                          {atsResult.rewriteSuggestions?.length > 0 && (
+                            <div className="card">
+                              <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">✍ Rewrite Suggestions</h4>
+                              <div className="space-y-2">
+                                {atsResult.rewriteSuggestions.map((s, i) => (
+                                  <div key={i} className="text-xs p-2.5 rounded-lg" style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                                    {s}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           )}
 
@@ -581,10 +830,24 @@ export default function ResumeBuilder() {
           </div>
 
           {/* RIGHT: Preview Panel */}
-          <div className={`flex-1 overflow-y-auto ${previewMode ? 'flex' : 'hidden md:block'} bg-gray-200`} style={{ minHeight: 0 }}>
-            <div className="p-4" style={{ minWidth: 0 }}>
+          <div className={`flex-1 overflow-y-auto flex flex-col ${previewMode ? 'flex' : 'hidden md:flex'}`} style={{ minHeight: 0, background: '#e5e7eb' }}>
+            {/* Template selector bar */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b overflow-x-auto shrink-0" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
+              <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--text-secondary)' }}>Template:</span>
+              {RESUME_TEMPLATES.map(t => (
+                <button key={t.id} onClick={() => setTemplate(t.id)}
+                  title={t.desc}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all"
+                  style={template === t.id
+                    ? { background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', color: 'white' }
+                    : { background: 'var(--bg-primary)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
               <div className="shadow-2xl rounded-sm overflow-hidden mx-auto" style={{ maxWidth: 800 }}>
-                <ResumePreview data={resumeData} />
+                <ResumePreview data={resumeData} template={template} />
               </div>
             </div>
           </div>

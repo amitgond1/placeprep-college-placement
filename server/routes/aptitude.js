@@ -212,4 +212,30 @@ router.get('/topics', protect, async (req, res) => {
   }
 });
 
+// GET /api/aptitude/pyq?company=TCS&section=quant&limit=20
+router.get('/pyq', protect, async (req, res) => {
+  try {
+    const { company, section, limit = 20 } = req.query;
+    const filter = { isPYQ: true };
+    if (company && company !== 'All') filter.companyTag = company;
+    if (section && section !== 'all') filter.section = section;
+    const questions = await AptitudeQuestion.find(filter)
+      .sort({ year: -1, companyTag: 1 })
+      .limit(Number(limit));
+    res.json({ questions, total: await AptitudeQuestion.countDocuments(filter) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/aptitude/pyq-companies — list companies that have PYQ
+router.get('/pyq-companies', protect, async (req, res) => {
+  try {
+    const companies = await AptitudeQuestion.distinct('companyTag', { isPYQ: true });
+    res.json({ companies: [...new Set(companies)].sort() });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

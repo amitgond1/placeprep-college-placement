@@ -3,108 +3,1036 @@ const mongoose = require('mongoose');
 const Question = require('../models/Question');
 
 const questions = [
-  // ========== AMAZON ==========
-  { title: 'Two Sum', difficulty: 'Easy', topic: 'Arrays', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 95, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/two-sum/', solution: { explanation: 'Use a hash map to store complement values.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Amazon often asks: What if array is sorted? What if multiple valid answers?' } },
-  { title: 'Longest Substring Without Repeating Characters', difficulty: 'Medium', topic: 'Strings', companies: ['Amazon', 'Microsoft', 'Google'], frequency: 88, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/longest-substring-without-repeating-characters/', solution: { explanation: 'Sliding window with a set to track characters.', timeComplexity: 'O(n)', spaceComplexity: 'O(min(m,n))', followUpTips: 'Amazon follow-up: Handle Unicode characters' } },
-  { title: 'Number of Islands', difficulty: 'Medium', topic: 'Graphs', companies: ['Amazon', 'Google', 'Microsoft', 'Flipkart'], frequency: 85, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/number-of-islands/', solution: { explanation: 'BFS/DFS to mark connected land cells as visited.', timeComplexity: 'O(m*n)', spaceComplexity: 'O(m*n)', followUpTips: 'Amazon asks: Can you solve without modifying input? Union-Find approach?' } },
-  { title: 'LRU Cache', difficulty: 'Medium', topic: 'Design', companies: ['Amazon', 'Google', 'Microsoft', 'Flipkart'], frequency: 82, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/lru-cache/', solution: { explanation: 'Use HashMap + Doubly Linked List for O(1) operations.', timeComplexity: 'O(1)', spaceComplexity: 'O(capacity)', followUpTips: 'Amazon: Implement LFU Cache. What if concurrent access?' } },
-  { title: 'Word Break', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Amazon', 'Google'], frequency: 78, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/word-break/', solution: { explanation: 'DP with boolean array, check all substrings.', timeComplexity: 'O(n^2)', spaceComplexity: 'O(n)', followUpTips: 'Return all possible sentences (Word Break II)' } },
-  { title: 'Trapping Rain Water', difficulty: 'Hard', topic: 'Arrays', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 76, rounds: ['DSA Round', 'Final Round'], leetcodeLink: 'https://leetcode.com/problems/trapping-rain-water/', solution: { explanation: 'Two pointers tracking left/right max heights.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Amazon: 2D version of trapping rain water' } },
-  { title: 'Copy List with Random Pointer', difficulty: 'Medium', topic: 'Linked Lists', companies: ['Amazon', 'Microsoft'], frequency: 73, rounds: ['Round 2'], leetcodeLink: 'https://leetcode.com/problems/copy-list-with-random-pointer/', solution: { explanation: 'Interweave original and cloned nodes, then separate.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Can you do it without extra space?' } },
-  { title: 'Merge K Sorted Lists', difficulty: 'Hard', topic: 'Linked Lists', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 71, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/merge-k-sorted-lists/', solution: { explanation: 'Use min-heap (priority queue) to always get minimum.', timeComplexity: 'O(n log k)', spaceComplexity: 'O(k)', followUpTips: 'Divide and conquer approach is also valid' } },
-  { title: 'Maximum Product Subarray', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Amazon', 'Flipkart'], frequency: 68, rounds: ['Round 1'], leetcodeLink: 'https://leetcode.com/problems/maximum-product-subarray/', solution: { explanation: 'Track both max and min products (negatives can flip).', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Handles zeros and negatives — important edge cases' } },
-  { title: 'Serialize and Deserialize Binary Tree', difficulty: 'Hard', topic: 'Trees', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 67, rounds: ['DSA Round', 'Final Round'], leetcodeLink: 'https://leetcode.com/problems/serialize-and-deserialize-binary-tree/', solution: { explanation: 'BFS level-order traversal with null markers.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Amazon: Why BFS vs DFS for serialization?' } },
-  { title: 'K Closest Points to Origin', difficulty: 'Medium', topic: 'Heap', companies: ['Amazon', 'Google', 'Flipkart'], frequency: 72, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/k-closest-points-to-origin/', solution: { explanation: 'Max-heap of size k, or QuickSelect for O(n) average.', timeComplexity: 'O(n log k)', spaceComplexity: 'O(k)', followUpTips: 'Amazon: Follow-up with streaming data' } },
-  { title: 'Sliding Window Maximum', difficulty: 'Hard', topic: 'Sliding Window', companies: ['Amazon', 'Google'], frequency: 65, rounds: ['DSA Round'], leetcodeLink: 'https://leetcode.com/problems/sliding-window-maximum/', solution: { explanation: 'Monotonic deque to maintain window maximum.', timeComplexity: 'O(n)', spaceComplexity: 'O(k)', followUpTips: 'Classic deque problem — explain the monotonic property' } },
-  { title: 'Meeting Rooms II', difficulty: 'Medium', topic: 'Intervals', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 69, rounds: ['Round 2'], leetcodeLink: 'https://leetcode.com/problems/meeting-rooms-ii/', solution: { explanation: 'Min-heap tracking end times of ongoing meetings.', timeComplexity: 'O(n log n)', spaceComplexity: 'O(n)', followUpTips: 'Amazon Leadership Principle: Deliver Results — optimize room usage' } },
-  { title: 'Binary Tree Level Order Traversal', difficulty: 'Medium', topic: 'Trees', companies: ['Amazon', 'Microsoft', 'Google'], frequency: 80, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/binary-tree-level-order-traversal/', solution: { explanation: 'BFS with queue, collect nodes level by level.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Zigzag level order, right side view — all BFS variants' } },
-  { title: 'Course Schedule', difficulty: 'Medium', topic: 'Graphs', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 74, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/course-schedule/', solution: { explanation: 'Topological sort (Kahn\'s BFS or DFS cycle detection).', timeComplexity: 'O(V+E)', spaceComplexity: 'O(V+E)', followUpTips: 'Amazon asks cycle detection in directed graphs often' } },
+// ===== 1. TWO SUM =====
+{
+  questionNumber:1,title:'Two Sum',slug:'two-sum',
+  difficulty:'Easy',topic:'Array',topics:['Array','Hash Table'],
+  companies:['Amazon','Google','Microsoft','Meta','Flipkart'],frequency:95,acceptance:52.3,
+  rounds:['Round 1','Online Test'],
+  description:'Given an array <code>nums</code> and integer <code>target</code>, return indices of the two numbers that add up to target.',
+  examples:[{input:'nums=[2,7,11,15], target=9',output:'[0,1]',explanation:'nums[0]+nums[1]=9'},{input:'nums=[3,2,4], target=6',output:'[1,2]'}],
+  constraints:['2 ≤ n ≤ 10⁴','Exactly one valid answer'],
+  hints:['For each number, check if its complement exists in a map'],
+  similarQuestions:['3Sum','Two Sum II'],
+  testCases:[
+    {input:'4\n2 7 11 15\n9',output:'[0,1]',isHidden:false},
+    {input:'3\n3 2 4\n6',output:'[1,2]',isHidden:false},
+    {input:'2\n3 3\n6',output:'[0,1]',isHidden:true},
+    {input:'5\n1 2 3 4 5\n9',output:'[3,4]',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // Write your solution here
 
-  // ========== GOOGLE ==========
-  { title: 'Median of Two Sorted Arrays', difficulty: 'Hard', topic: 'Binary Search', companies: ['Google', 'Amazon', 'Microsoft'], frequency: 82, rounds: ['DSA Round', 'Final Round'], leetcodeLink: 'https://leetcode.com/problems/median-of-two-sorted-arrays/', solution: { explanation: 'Binary search on the smaller array to find partition.', timeComplexity: 'O(log(min(m,n)))', spaceComplexity: 'O(1)', followUpTips: 'Google asks this to test binary search mastery' } },
-  { title: 'Word Ladder', difficulty: 'Hard', topic: 'BFS', companies: ['Google', 'Amazon'], frequency: 69, rounds: ['DSA Round'], leetcodeLink: 'https://leetcode.com/problems/word-ladder/', solution: { explanation: 'BFS with one character changes, using set for O(1) lookup.', timeComplexity: 'O(M^2 * N)', spaceComplexity: 'O(M^2 * N)', followUpTips: 'Bidirectional BFS reduces search space significantly' } },
-  { title: 'Minimum Window Substring', difficulty: 'Hard', topic: 'Sliding Window', companies: ['Google', 'Amazon', 'Facebook'], frequency: 77, rounds: ['DSA Round', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/minimum-window-substring/', solution: { explanation: 'Sliding window with character frequency maps.', timeComplexity: 'O(|S|+|T|)', spaceComplexity: 'O(|S|+|T|)', followUpTips: 'Google loves sliding window problems at hard level' } },
-  { title: 'Longest Palindromic Substring', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Google', 'Amazon', 'Microsoft'], frequency: 79, rounds: ['Round 1', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/longest-palindromic-substring/', solution: { explanation: 'Expand around center approach or Manacher\'s algorithm.', timeComplexity: 'O(n^2) or O(n)', spaceComplexity: 'O(1) or O(n)', followUpTips: 'Google: Know Manacher\'s for O(n) solution' } },
-  { title: 'Regular Expression Matching', difficulty: 'Hard', topic: 'Dynamic Programming', companies: ['Google', 'Facebook'], frequency: 63, rounds: ['DSA Round'], leetcodeLink: 'https://leetcode.com/problems/regular-expression-matching/', solution: { explanation: 'DP table where dp[i][j] = pattern p[:j] matches s[:i].', timeComplexity: 'O(m*n)', spaceComplexity: 'O(m*n)', followUpTips: 'Google tests DP state design skills' } },
-  { title: 'Alien Dictionary', difficulty: 'Hard', topic: 'Topological Sort', companies: ['Google', 'Facebook', 'Microsoft'], frequency: 72, rounds: ['DSA Round', 'Final Round'], leetcodeLink: 'https://leetcode.com/problems/alien-dictionary/', solution: { explanation: 'Build graph from adjacent word comparisons, topological sort.', timeComplexity: 'O(C) where C is total length', spaceComplexity: 'O(1) since 26 chars', followUpTips: 'Graph construction from constraints is key insight' } },
-  { title: 'Design Search Autocomplete System', difficulty: 'Hard', topic: 'Trie', companies: ['Google', 'Amazon', 'Microsoft'], frequency: 61, rounds: ['Final Round', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/design-search-autocomplete-system/', solution: { explanation: 'Trie with sentence frequencies, maintain top-3 per node.', timeComplexity: 'O(n*l) build, O(p) search', spaceComplexity: 'O(n*l)', followUpTips: 'Real Google product design — mention caching strategies' } },
-  { title: 'Jump Game II', difficulty: 'Medium', topic: 'Greedy', companies: ['Google', 'Amazon'], frequency: 74, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/jump-game-ii/', solution: { explanation: 'Greedy: track farthest reachable at each jump level.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Google: prove greedy works with induction' } },
-  { title: 'Longest Consecutive Sequence', difficulty: 'Medium', topic: 'Hash Set', companies: ['Google', 'Amazon', 'Facebook'], frequency: 76, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/longest-consecutive-sequence/', solution: { explanation: 'HashSet, only start counting from sequence beginnings.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'O(n) constraint makes sorting solution invalid' } },
-  { title: 'Reconstruct Itinerary', difficulty: 'Hard', topic: 'Eulerian Path', companies: ['Google', 'Amazon'], frequency: 58, rounds: ['DSA Round'], leetcodeLink: 'https://leetcode.com/problems/reconstruct-itinerary/', solution: { explanation: 'Hierholzer\'s algorithm for Eulerian path in directed graph.', timeComplexity: 'O(E log E)', spaceComplexity: 'O(E)', followUpTips: 'Eulerian path — ensure lexicographic ordering via sorted adjacency' } },
-  { title: 'Burst Balloons', difficulty: 'Hard', topic: 'Dynamic Programming', companies: ['Google', 'Facebook'], frequency: 55, rounds: ['DSA Round'], leetcodeLink: 'https://leetcode.com/problems/burst-balloons/', solution: { explanation: 'Interval DP: think which balloon to burst last in range.', timeComplexity: 'O(n^3)', spaceComplexity: 'O(n^2)', followUpTips: 'Counter-intuitive DP direction — think last burst not first' } },
+    }
+};
+int main() {
+    int n; cin>>n; vector<int> nums(n);
+    for(int i=0;i<n;i++) cin>>nums[i];
+    int t; cin>>t;
+    auto r=Solution().twoSum(nums,t);
+    cout<<"["; for(int i=0;i<(int)r.size();i++){if(i)cout<<",";cout<<r[i];} cout<<"]\\n";
+}`,
+    java:`import java.util.*;
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Write your solution here
+        return new int[]{};
+    }
+}
+class Main {
+    public static void main(String[] args) {
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(); int[] nums=new int[n];
+        for(int i=0;i<n;i++) nums[i]=sc.nextInt();
+        int[] r=new Solution().twoSum(nums,sc.nextInt());
+        StringBuilder sb=new StringBuilder("[");
+        for(int i=0;i<r.length;i++){if(i>0)sb.append(",");sb.append(r[i]);}
+        System.out.println(sb+"]");
+    }
+}`,
+    python:`from typing import List
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); nums=list(map(int,input().split())); t=int(input())
+    print('['+','.join(map(str,Solution().twoSum(nums,t)))+']')`
+  },
+  editorial:{
+    approach1:{name:'Brute Force',timeComplexity:'O(n²)',spaceComplexity:'O(1)',explanation:'Check every pair.',code:{cpp:'for(int i=0;i<n;i++) for(int j=i+1;j<n;j++) if(nums[i]+nums[j]==target) return{i,j};',java:'',python:''}},
+    approach2:{name:'HashMap One-pass',timeComplexity:'O(n)',spaceComplexity:'O(n)',explanation:'Store complement in map, check on each step.',
+      code:{cpp:'unordered_map<int,int> mp;\nfor(int i=0;i<(int)nums.size();i++){\n  if(mp.count(target-nums[i])) return{mp[target-nums[i]],i};\n  mp[nums[i]]=i;\n}',
+            java:'Map<Integer,Integer> m=new HashMap<>();\nfor(int i=0;i<nums.length;i++){\n  if(m.containsKey(target-nums[i])) return new int[]{m.get(target-nums[i]),i};\n  m.put(nums[i],i);\n}',
+            python:'seen={}\nfor i,v in enumerate(nums):\n  if target-v in seen: return[seen[target-v],i]\n  seen[v]=i'}},
+    companyNote:'Amazon: sorted array → Two Pointers. Google: multiple valid answers.',
+    striverLink:'https://takeuforward.org/data-structure/two-sum-check-if-a-pair-with-given-sum-exists-in-array/'
+  },
+  solution:{code:'HashMap',language:'cpp',explanation:'One-pass HashMap',timeComplexity:'O(n)',spaceComplexity:'O(n)',followUpTips:'Two Pointer for sorted input'}
+},
+// ===== 2. VALID PARENTHESES =====
+{
+  questionNumber:20,title:'Valid Parentheses',slug:'valid-parentheses',
+  difficulty:'Easy',topic:'Stack',topics:['String','Stack'],
+  companies:['Amazon','Google','Microsoft','Meta'],frequency:88,acceptance:41.2,
+  rounds:['Round 1','Online Test'],
+  description:'Given string with <code>()[]{}></code>, determine if it is valid. Open brackets must be closed by same type in correct order.',
+  examples:[{input:'s="()"',output:'true'},{input:'s="()[]{}"',output:'true'},{input:'s="(]"',output:'false'}],
+  constraints:['1 ≤ s.length ≤ 10⁴'],hints:['Use a stack'],
+  testCases:[
+    {input:'()',output:'true',isHidden:false},{input:'()[]{}',output:'true',isHidden:false},
+    {input:'(]',output:'false',isHidden:true},{input:'([)]',output:'false',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    bool isValid(string s) {
+        // Write your solution here
 
-  // ========== MICROSOFT ==========
-  { title: 'Reverse Linked List', difficulty: 'Easy', topic: 'Linked Lists', companies: ['Microsoft', 'Amazon', 'TCS', 'Wipro'], frequency: 90, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/reverse-linked-list/', solution: { explanation: 'Iterative: prev, curr, next pointers. Or recursive.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Microsoft: Reverse in groups of K' } },
-  { title: 'Validate Binary Search Tree', difficulty: 'Medium', topic: 'Trees', companies: ['Microsoft', 'Amazon', 'Google'], frequency: 83, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/validate-binary-search-tree/', solution: { explanation: 'Pass min/max bounds recursively.', timeComplexity: 'O(n)', spaceComplexity: 'O(h)', followUpTips: 'Microsoft loves tree traversal and BST properties' } },
-  { title: 'Maximum Depth of Binary Tree', difficulty: 'Easy', topic: 'Trees', companies: ['Microsoft', 'Amazon', 'TCS'], frequency: 88, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/maximum-depth-of-binary-tree/', solution: { explanation: 'Recursive: 1 + max(left depth, right depth).', timeComplexity: 'O(n)', spaceComplexity: 'O(h)', followUpTips: 'Classic recursion — also know iterative BFS approach' } },
-  { title: 'Lowest Common Ancestor of a Binary Tree', difficulty: 'Medium', topic: 'Trees', companies: ['Microsoft', 'Amazon', 'Google', 'Flipkart'], frequency: 79, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/', solution: { explanation: 'Recurse: if node found or splits the path, it\'s LCA.', timeComplexity: 'O(n)', spaceComplexity: 'O(h)', followUpTips: 'Microsoft: LCA in BST (can use BST property for O(h))' } },
-  { title: 'Spiral Matrix', difficulty: 'Medium', topic: 'Arrays', companies: ['Microsoft', 'Amazon', 'Google'], frequency: 75, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/spiral-matrix/', solution: { explanation: 'Boundary-based traversal: top, right, bottom, left.', timeComplexity: 'O(m*n)', spaceComplexity: 'O(1)', followUpTips: 'Microsoft: Spiral Matrix II (fill), rotate matrix' } },
-  { title: 'Implement Trie', difficulty: 'Medium', topic: 'Trie', companies: ['Microsoft', 'Google', 'Amazon'], frequency: 72, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/implement-trie-prefix-tree/', solution: { explanation: 'Array[26] of TrieNode children, isEnd flag.', timeComplexity: 'O(m) per op', spaceComplexity: 'O(m*n)', followUpTips: 'Microsoft: Wildcard search in Trie' } },
-  { title: 'Find Median from Data Stream', difficulty: 'Hard', topic: 'Heap', companies: ['Microsoft', 'Amazon', 'Google'], frequency: 68, rounds: ['DSA Round', 'Final Round'], leetcodeLink: 'https://leetcode.com/problems/find-median-from-data-stream/', solution: { explanation: 'Two heaps: max-heap for lower half, min-heap for upper half.', timeComplexity: 'O(log n) add, O(1) find', spaceComplexity: 'O(n)', followUpTips: 'Classic two-heap problem — rebalance after each insertion' } },
-  { title: 'Decode Ways', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Microsoft', 'Amazon', 'Facebook'], frequency: 74, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/decode-ways/', solution: { explanation: 'DP: dp[i] = ways to decode s[:i]. Handle \'0\' carefully.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Microsoft: Decode Ways II with \'*\' wildcard' } },
-  { title: 'Clone Graph', difficulty: 'Medium', topic: 'Graphs', companies: ['Microsoft', 'Amazon', 'Google'], frequency: 71, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/clone-graph/', solution: { explanation: 'DFS/BFS with HashMap mapping original to clone nodes.', timeComplexity: 'O(V+E)', spaceComplexity: 'O(V)', followUpTips: 'Hash map crucial to handle cycles' } },
+    }
+};
+int main() { string s; cin>>s; cout<<(Solution().isValid(s)?"true":"false")<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution {
+    public boolean isValid(String s) {
+        // Write your solution here
+        return false;
+    }
+}
+class Main { public static void main(String[] args) {
+    System.out.println(new Solution().isValid(new Scanner(System.in).next())?"true":"false"); }}`,
+    python:`class Solution:
+    def isValid(self, s: str) -> bool:
+        # Write your solution here
+        pass
+if __name__=="__main__": print(str(Solution().isValid(input().strip())).lower())`
+  },
+  editorial:{
+    approach1:{name:'Stack',timeComplexity:'O(n)',spaceComplexity:'O(n)',explanation:'Push opening. For closing, check top matches.',
+      code:{cpp:"stack<char> st;\nfor(char c:s){\n  if(c=='('||c=='['||c=='{') st.push(c);\n  else{\n    if(st.empty()) return false;\n    char t=st.top();st.pop();\n    if((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;\n  }\n}\nreturn st.empty();",java:'',python:''}},
+    companyNote:'Amazon follow-up: angle brackets. Classic Google phone screen.'
+  },
+  solution:{code:'Stack',language:'cpp',explanation:'Stack',timeComplexity:'O(n)',spaceComplexity:'O(n)',followUpTips:'O(1) space impossible in general'}
+},
+// ===== 3. MAXIMUM SUBARRAY =====
+{
+  questionNumber:53,title:'Maximum Subarray',slug:'maximum-subarray',
+  difficulty:'Easy',topic:'Array',topics:['Array','Dynamic Programming'],
+  companies:['Amazon','Google','Microsoft','Meta','TCS'],frequency:90,acceptance:50.1,
+  rounds:['Round 1','DSA Round'],
+  description:'Find the subarray with the largest sum and return its sum.',
+  examples:[{input:'nums=[-2,1,-3,4,-1,2,1,-5,4]',output:'6',explanation:'[4,-1,2,1]=6'},{input:'nums=[1]',output:'1'}],
+  constraints:['1 ≤ n ≤ 10⁵'],hints:["Kadane: reset when current sum goes negative"],
+  testCases:[
+    {input:'9\n-2 1 -3 4 -1 2 1 -5 4',output:'6',isHidden:false},
+    {input:'1\n1',output:'1',isHidden:false},
+    {input:'4\n-2 -1 -3 -4',output:'-1',isHidden:true},
+    {input:'5\n5 4 -1 7 8',output:'23',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        // Write your solution here
 
-  // ========== TCS NQT ==========
-  { title: 'Find Missing Number', difficulty: 'Easy', topic: 'Arrays', companies: ['TCS', 'Wipro', 'Infosys', 'Cognizant'], frequency: 92, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/missing-number/', solution: { explanation: 'XOR all numbers with indices, or use sum formula n*(n+1)/2.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'TCS NQT favorite — also know cyclic sort approach' } },
-  { title: 'Fibonacci Number', difficulty: 'Easy', topic: 'Dynamic Programming', companies: ['TCS', 'Wipro', 'Infosys', 'Capgemini'], frequency: 89, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/fibonacci-number/', solution: { explanation: 'Iterative O(n) or matrix exponentiation O(log n).', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'TCS often asks Fibonacci with memoization or print first n terms' } },
-  { title: 'Palindrome Number', difficulty: 'Easy', topic: 'Strings', companies: ['TCS', 'Wipro', 'Infosys', 'Cognizant', 'HCL'], frequency: 91, rounds: ['Online Test'], leetcodeLink: 'https://leetcode.com/problems/palindrome-number/', solution: { explanation: 'Reverse half the number and compare. Handle negatives.', timeComplexity: 'O(log n)', spaceComplexity: 'O(1)', followUpTips: 'Without converting to string — TCS NQT constraint' } },
-  { title: 'Reverse String', difficulty: 'Easy', topic: 'Strings', companies: ['TCS', 'Wipro', 'Infosys', 'Capgemini', 'HCL', 'Tech Mahindra'], frequency: 88, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/reverse-string/', solution: { explanation: 'Two pointers from both ends, swap.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'TCS: Also reverse words in a sentence' } },
-  { title: 'Remove Duplicates from Sorted Array', difficulty: 'Easy', topic: 'Arrays', companies: ['TCS', 'Wipro', 'Infosys', 'Accenture'], frequency: 87, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/remove-duplicates-from-sorted-array/', solution: { explanation: 'Two pointers: slow tracks unique, fast explores.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'In-place operation — TCS NQT frequently tests this' } },
-  { title: 'Sort an Array', difficulty: 'Medium', topic: 'Sorting', companies: ['TCS', 'Wipro', 'Infosys', 'Cognizant', 'Accenture'], frequency: 85, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/sort-an-array/', solution: { explanation: 'Merge Sort for stable O(n log n). Know Quick Sort too.', timeComplexity: 'O(n log n)', spaceComplexity: 'O(n)', followUpTips: 'TCS asks to implement sorting without library functions' } },
-  { title: 'Search in Rotated Sorted Array', difficulty: 'Medium', topic: 'Binary Search', companies: ['TCS', 'Amazon', 'Google', 'Microsoft'], frequency: 81, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/search-in-rotated-sorted-array/', solution: { explanation: 'Modified binary search: determine which half is sorted.', timeComplexity: 'O(log n)', spaceComplexity: 'O(1)', followUpTips: 'TCS NQT advanced section — understand pivot finding' } },
-  { title: 'Valid Parentheses', difficulty: 'Easy', topic: 'Stack', companies: ['TCS', 'Wipro', 'Amazon', 'Microsoft', 'Google'], frequency: 90, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/valid-parentheses/', solution: { explanation: 'Stack: push open brackets, pop when close bracket matches.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'TCS: Also generate all valid parentheses (backtracking)' } },
-  { title: 'Best Time to Buy and Sell Stock', difficulty: 'Easy', topic: 'Arrays', companies: ['TCS', 'Wipro', 'Amazon', 'Google', 'Flipkart'], frequency: 91, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/best-time-to-buy-and-sell-stock/', solution: { explanation: 'Track min price and max profit in single pass.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'TCS: Buy/sell multiple times (Stock II), with cooldown (III)' } },
-  { title: 'Linked List Cycle', difficulty: 'Easy', topic: 'Linked Lists', companies: ['TCS', 'Wipro', 'Infosys', 'Cognizant'], frequency: 88, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/linked-list-cycle/', solution: { explanation: 'Floyd\'s Tortoise and Hare: slow/fast pointers.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'TCS: Find cycle start node (Floyd\'s part 2)' } },
+    }
+};
+int main() { int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x; cout<<Solution().maxSubArray(v)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int maxSubArray(int[] nums) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt();
+    System.out.println(new Solution().maxSubArray(v)); }}`,
+    python:`from typing import List
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": n=int(input()); print(Solution().maxSubArray(list(map(int,input().split()))))`
+  },
+  editorial:{
+    approach1:{name:"Kadane's",timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'curr=max(x,curr+x). Track global max.',
+      code:{cpp:'int res=nums[0],cur=nums[0];\nfor(int i=1;i<(int)nums.size();i++){cur=max(nums[i],cur+nums[i]);res=max(res,cur);}\nreturn res;',java:'',python:'cur=res=nums[0]\nfor n in nums[1:]:\n  cur=max(n,cur+n);res=max(res,cur)\nreturn res'}},
+    companyNote:"Amazon: Return indices too. Google: Divide & conquer O(n log n)."
+  },
+  solution:{code:"Kadane's",language:'cpp',explanation:"Kadane's",timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'Track start/end for indices'}
+},
+// ===== 4. CLIMBING STAIRS =====
+{
+  questionNumber:70,title:'Climbing Stairs',slug:'climbing-stairs',
+  difficulty:'Easy',topic:'Dynamic Programming',topics:['Math','Dynamic Programming'],
+  companies:['Amazon','Google','Adobe','Flipkart','TCS'],frequency:82,acceptance:52.8,
+  rounds:['Round 1','Online Test'],
+  description:'Reach top of n stairs. Can climb 1 or 2 at a time. How many distinct ways?',
+  examples:[{input:'n=2',output:'2',explanation:'1+1 or 2'},{input:'n=3',output:'3'}],
+  constraints:['1 ≤ n ≤ 45'],hints:['Fibonacci! f(n)=f(n-1)+f(n-2)'],
+  testCases:[
+    {input:'2',output:'2',isHidden:false},{input:'3',output:'3',isHidden:false},
+    {input:'10',output:'89',isHidden:true},{input:'45',output:'1836311903',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int climbStairs(int n) {
+        // Write your solution here
 
-  // ========== WIPRO/INFOSYS ==========
-  { title: 'Counting Bits', difficulty: 'Easy', topic: 'Bit Manipulation', companies: ['Wipro', 'Infosys', 'TCS', 'Cognizant'], frequency: 82, rounds: ['Online Test'], leetcodeLink: 'https://leetcode.com/problems/counting-bits/', solution: { explanation: 'DP: bits[i] = bits[i>>1] + (i&1).', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Bit manipulation basics — Wipro NTH common topic' } },
-  { title: 'Maximum Subarray (Kadane\'s)', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Infosys', 'TCS', 'Wipro', 'Cognizant', 'Capgemini'], frequency: 93, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/maximum-subarray/', solution: { explanation: 'Kadane\'s: maxCurrent = max(num, maxCurrent + num).', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Infosys Springboard must-know — also return the subarray' } },
-  { title: 'Rotate Array', difficulty: 'Medium', topic: 'Arrays', companies: ['Wipro', 'Infosys', 'TCS', 'Accenture'], frequency: 84, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/rotate-array/', solution: { explanation: 'Reverse entire array, then reverse first k, then rest.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'In-place O(1) space — the reversal trick is key' } },
-  { title: 'Contains Duplicate', difficulty: 'Easy', topic: 'Hash Set', companies: ['Infosys', 'Wipro', 'TCS', 'HCL'], frequency: 86, rounds: ['Online Test'], leetcodeLink: 'https://leetcode.com/problems/contains-duplicate/', solution: { explanation: 'HashSet: return true if element already in set.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Infosys: Find duplicates within k distance (Contains Duplicate II)' } },
-  { title: 'Climbing Stairs', difficulty: 'Easy', topic: 'Dynamic Programming', companies: ['Infosys', 'TCS', 'Wipro', 'Capgemini'], frequency: 88, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/climbing-stairs/', solution: { explanation: 'Fibonacci variant: dp[i] = dp[i-1] + dp[i-2].', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Infosys: Steps of 1,2,3 simultaneously (Tribonacci)' } },
+    }
+};
+int main() { int n; cin>>n; cout<<Solution().climbStairs(n)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int climbStairs(int n) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    System.out.println(new Solution().climbStairs(new Scanner(System.in).nextInt())); }}`,
+    python:`class Solution:
+    def climbStairs(self, n: int) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": print(Solution().climbStairs(int(input())))`
+  },
+  editorial:{
+    approach1:{name:'DP Fibonacci',timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'f(n)=f(n-1)+f(n-2) with rolling vars.',
+      code:{cpp:'if(n<=2)return n;\nint a=1,b=2;\nfor(int i=3;i<=n;i++){int c=a+b;a=b;b=c;}\nreturn b;',java:'if(n<=2)return n;int a=1,b=2;for(int i=3;i<=n;i++){int c=a+b;a=b;b=c;}return b;',python:'a,b=1,2\nfor _ in range(n-2): a,b=b,a+b\nreturn b if n>1 else 1'}},
+    companyNote:'Amazon: k steps. Google: matrix exponentiation O(log n).'
+  },
+  solution:{code:'Fibonacci DP',language:'cpp',explanation:'f(n)=f(n-1)+f(n-2)',timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'k-step generalization'}
+},
+// ===== 5. BEST TIME TO BUY AND SELL =====
+{
+  questionNumber:121,title:'Best Time to Buy and Sell Stock',slug:'best-time-to-buy-and-sell-stock',
+  difficulty:'Easy',topic:'Array',topics:['Array','Dynamic Programming'],
+  companies:['Amazon','Meta','Google','Microsoft','Apple','Netflix'],frequency:85,acceptance:54.2,
+  rounds:['Round 1','Online Test'],
+  description:'prices[i] = stock price on day i. Choose one day to buy and one future day to sell. Return max profit.',
+  examples:[{input:'prices=[7,1,5,3,6,4]',output:'5',explanation:'Buy at 1, sell at 6'},{input:'prices=[7,6,4,3,1]',output:'0'}],
+  constraints:['1 ≤ n ≤ 10⁵'],hints:['Track minimum price seen so far'],
+  testCases:[
+    {input:'6\n7 1 5 3 6 4',output:'5',isHidden:false},{input:'5\n7 6 4 3 1',output:'0',isHidden:false},
+    {input:'1\n1',output:'0',isHidden:true},{input:'4\n2 4 1 7',output:'6',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        // Write your solution here
 
-  // ========== FLIPKART/MEESHO ==========
-  { title: 'Subarray Sum Equals K', difficulty: 'Medium', topic: 'Prefix Sum', companies: ['Flipkart', 'Amazon', 'Google'], frequency: 76, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/subarray-sum-equals-k/', solution: { explanation: 'Prefix sum with HashMap: count[prefixSum - k].', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Flipkart: Maximum subarray with sum exactly K' } },
-  { title: 'Top K Frequent Elements', difficulty: 'Medium', topic: 'Heap', companies: ['Flipkart', 'Amazon', 'Google', 'Microsoft'], frequency: 78, rounds: ['Round 1', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/top-k-frequent-elements/', solution: { explanation: 'Min-heap of size k, or bucket sort O(n).', timeComplexity: 'O(n log k)', spaceComplexity: 'O(n)', followUpTips: 'Bucket sort gives O(n) — Flipkart often asks optimal approach' } },
-  { title: 'Product of Array Except Self', difficulty: 'Medium', topic: 'Arrays', companies: ['Flipkart', 'Amazon', 'Google', 'Microsoft'], frequency: 79, rounds: ['Round 1', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/product-of-array-except-self/', solution: { explanation: 'Left pass then right pass — no division, no extra space.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'No division operator constraint — key insight' } },
-  { title: 'Daily Temperatures', difficulty: 'Medium', topic: 'Stack', companies: ['Flipkart', 'Amazon', 'Google'], frequency: 74, rounds: ['Round 2'], leetcodeLink: 'https://leetcode.com/problems/daily-temperatures/', solution: { explanation: 'Monotonic decreasing stack storing indices.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Next greater element pattern — useful in many Flipkart Qs' } },
-  { title: 'Coin Change', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Flipkart', 'Amazon', 'Google', 'Microsoft'], frequency: 77, rounds: ['Round 1', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/coin-change/', solution: { explanation: 'Unbounded knapsack DP: dp[i] = min coins to make amount i.', timeComplexity: 'O(amount * coins)', spaceComplexity: 'O(amount)', followUpTips: 'Classic BFS approach also works — Flipkart tests both' } },
+    }
+};
+int main() { int n; cin>>n; vector<int> p(n); for(auto&x:p)cin>>x; cout<<Solution().maxProfit(p)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int maxProfit(int[] prices) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] p=new int[n];
+    for(int i=0;i<n;i++) p[i]=sc.nextInt();
+    System.out.println(new Solution().maxProfit(p)); }}`,
+    python:`from typing import List
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": n=int(input()); print(Solution().maxProfit(list(map(int,input().split()))))`
+  },
+  editorial:{
+    approach1:{name:'One-pass Min Tracking',timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'Track minPrice. profit=price-minPrice.',
+      code:{cpp:'int mn=INT_MAX,res=0;\nfor(int p:prices){mn=min(mn,p);res=max(res,p-mn);}\nreturn res;',java:'int mn=Integer.MAX_VALUE,res=0;\nfor(int p:prices){mn=Math.min(mn,p);res=Math.max(res,p-mn);}\nreturn res;',python:'mn,res=float("inf"),0\nfor p in prices: mn=min(mn,p);res=max(res,p-mn)\nreturn res'}},
+    companyNote:'Meta: unlimited transactions. Amazon: with cooldown.'
+  },
+  solution:{code:'Track min',language:'cpp',explanation:'One-pass',timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'Multiple transactions variant'}
+},
+// ===== 6. LONGEST SUBSTRING WITHOUT REPEATING =====
+{
+  questionNumber:3,title:'Longest Substring Without Repeating Characters',slug:'longest-substring-without-repeating-characters',
+  difficulty:'Medium',topic:'String',topics:['Hash Table','String','Sliding Window'],
+  companies:['Amazon','Google','Microsoft','Meta','Flipkart'],frequency:90,acceptance:34.1,
+  rounds:['Round 1','Round 2'],
+  description:'Find the length of the longest substring without repeating characters.',
+  examples:[{input:'s="abcabcbb"',output:'3'},{input:'s="bbbbb"',output:'1'},{input:'s="pwwkew"',output:'3'}],
+  constraints:['0 ≤ s.length ≤ 5×10⁴'],hints:['Sliding window with char→last_index map'],
+  testCases:[
+    {input:'abcabcbb',output:'3',isHidden:false},{input:'bbbbb',output:'1',isHidden:false},
+    {input:'pwwkew',output:'3',isHidden:true},{input:' ',output:'1',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        // Write your solution here
 
-  // ========== META/FACEBOOK ==========
-  { title: 'Valid Anagram', difficulty: 'Easy', topic: 'Strings', companies: ['Meta', 'Amazon', 'Google'], frequency: 85, rounds: ['Online Test', 'Round 1'], leetcodeLink: 'https://leetcode.com/problems/valid-anagram/', solution: { explanation: 'Count character frequencies with array[26] or HashMap.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Meta: Unicode characters, streaming input variations' } },
-  { title: 'Group Anagrams', difficulty: 'Medium', topic: 'Hash Map', companies: ['Meta', 'Amazon', 'Google'], frequency: 80, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/group-anagrams/', solution: { explanation: 'Sort each word as key, group by key in HashMap.', timeComplexity: 'O(n * k log k)', spaceComplexity: 'O(n*k)', followUpTips: 'Meta: Use character count array as key for O(n*k)' } },
-  { title: 'Accounts Merge', difficulty: 'Medium', topic: 'Union Find', companies: ['Meta', 'Amazon', 'Google'], frequency: 68, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/accounts-merge/', solution: { explanation: 'Union-Find: union emails sharing an account.', timeComplexity: 'O(n * alpha(n))', spaceComplexity: 'O(n)', followUpTips: 'Union-Find with path compression and union by rank' } },
-  { title: 'Nested List Weight Sum', difficulty: 'Medium', topic: 'DFS', companies: ['Meta', 'Amazon', 'Google'], frequency: 62, rounds: ['Round 2'], leetcodeLink: 'https://leetcode.com/problems/nested-list-weight-sum/', solution: { explanation: 'DFS with depth multiplier for each nesting level.', timeComplexity: 'O(n)', spaceComplexity: 'O(d)', followUpTips: 'Meta: Nested List Weight Sum II (inverse weighting)' } },
+    }
+};
+int main() { string s; getline(cin,s); cout<<Solution().lengthOfLongestSubstring(s)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int lengthOfLongestSubstring(String s) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in);
+    System.out.println(new Solution().lengthOfLongestSubstring(sc.hasNextLine()?sc.nextLine():"")); }}`,
+    python:`class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": print(Solution().lengthOfLongestSubstring(input()))`
+  },
+  editorial:{
+    approach1:{name:'Sliding Window + HashMap',timeComplexity:'O(n)',spaceComplexity:'O(min(m,n))',explanation:'Map char→last_index. Left pointer jumps past last duplicate.',
+      code:{cpp:'unordered_map<char,int> mp;int l=0,res=0;\nfor(int r=0;r<(int)s.size();r++){\n  if(mp.count(s[r])) l=max(l,mp[s[r]]+1);\n  mp[s[r]]=r;res=max(res,r-l+1);\n}\nreturn res;',java:'',python:'seen={};l=res=0\nfor r,c in enumerate(s):\n  if c in seen:l=max(l,seen[c]+1)\n  seen[c]=r;res=max(res,r-l+1)\nreturn res'}},
+    companyNote:'Amazon: at-most k distinct. Google: return actual substring.'
+  },
+  solution:{code:'Sliding window',language:'cpp',explanation:'Sliding window',timeComplexity:'O(n)',spaceComplexity:'O(n)',followUpTips:'At-most-k-distinct variant'}
+},
+// ===== 7. MERGE INTERVALS =====
+{
+  questionNumber:56,title:'Merge Intervals',slug:'merge-intervals',
+  difficulty:'Medium',topic:'Array',topics:['Array','Sorting'],
+  companies:['Amazon','Google','Microsoft','Meta','Flipkart'],frequency:80,acceptance:46.2,
+  rounds:['Round 2','DSA Round'],
+  description:'Given array of intervals, merge all overlapping intervals.',
+  examples:[{input:'[[1,3],[2,6],[8,10],[15,18]]',output:'[[1,6],[8,10],[15,18]]'},{input:'[[1,4],[4,5]]',output:'[[1,5]]'}],
+  constraints:['1 ≤ n ≤ 10⁴'],hints:['Sort by start. If overlap, extend last merged.'],
+  testCases:[
+    {input:'4\n1 3\n2 6\n8 10\n15 18',output:'[[1,6],[8,10],[15,18]]',isHidden:false},
+    {input:'2\n1 4\n4 5',output:'[[1,5]]',isHidden:false},
+    {input:'1\n1 4',output:'[[1,4]]',isHidden:true},
+    {input:'3\n1 4\n2 3\n5 6',output:'[[1,4],[5,6]]',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        // Write your solution here
 
-  // ========== ZOHO ==========
-  { title: 'Implement Stack Using Queues', difficulty: 'Easy', topic: 'Stack', companies: ['Zoho', 'TCS', 'Wipro'], frequency: 78, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/implement-stack-using-queues/', solution: { explanation: 'Push: enqueue and rotate all previous elements.', timeComplexity: 'O(n) push', spaceComplexity: 'O(n)', followUpTips: 'Zoho: Implement Queue using Stacks (two-stack approach)' } },
-  { title: 'Rotate Image', difficulty: 'Medium', topic: 'Arrays', companies: ['Zoho', 'Amazon', 'Microsoft', 'Google'], frequency: 76, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/rotate-image/', solution: { explanation: 'Transpose then reverse each row (or reverse then transpose for CCW).', timeComplexity: 'O(n^2)', spaceComplexity: 'O(1)', followUpTips: 'Zoho loves matrix manipulation problems' } },
-  { title: 'Flatten Binary Tree to Linked List', difficulty: 'Medium', topic: 'Trees', companies: ['Zoho', 'Amazon', 'Microsoft'], frequency: 71, rounds: ['Round 2'], leetcodeLink: 'https://leetcode.com/problems/flatten-binary-tree-to-linked-list/', solution: { explanation: 'Morris traversal or reverse pre-order (right, left, root).', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Zoho tests in-place tree modifications' } },
+    }
+};
+int main() {
+    int n; cin>>n; vector<vector<int>> iv(n,vector<int>(2));
+    for(int i=0;i<n;i++) cin>>iv[i][0]>>iv[i][1];
+    auto r=Solution().merge(iv);
+    cout<<"["; for(int i=0;i<(int)r.size();i++){if(i)cout<<",";cout<<"["<<r[i][0]<<","<<r[i][1]<<"]";} cout<<"]\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public int[][] merge(int[][] iv) { /* your code */ return new int[0][0]; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[][] iv=new int[n][2];
+    for(int i=0;i<n;i++){iv[i][0]=sc.nextInt();iv[i][1]=sc.nextInt();}
+    int[][] r=new Solution().merge(iv);
+    StringBuilder sb=new StringBuilder("[");
+    for(int i=0;i<r.length;i++){if(i>0)sb.append(",");sb.append("[").append(r[i][0]).append(",").append(r[i][1]).append("]");}
+    System.out.println(sb+"]"); }}`,
+    python:`from typing import List
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); iv=[list(map(int,input().split())) for _ in range(n)]
+    r=Solution().merge(iv); print('['+','.join(['['+str(a)+','+str(b)+']' for a,b in r])+']')`
+  },
+  editorial:{
+    approach1:{name:'Sort + Greedy',timeComplexity:'O(n log n)',spaceComplexity:'O(n)',explanation:'Sort by start. Extend last if overlap else add new.',
+      code:{cpp:'sort(iv.begin(),iv.end());\nvector<vector<int>> r;\nfor(auto& c:intervals){\n  if(r.empty()||c[0]>r.back()[1]) r.push_back(c);\n  else r.back()[1]=max(r.back()[1],c[1]);\n}\nreturn r;',java:'',python:''}},
+    companyNote:'Amazon: Insert Interval. Google: Meeting Rooms II.'
+  },
+  solution:{code:'Sort merge',language:'cpp',explanation:'Sort + greedy',timeComplexity:'O(n log n)',spaceComplexity:'O(n)',followUpTips:'Insert Interval variant'}
+},
+// ===== 8. NUMBER OF ISLANDS =====
+{
+  questionNumber:200,title:'Number of Islands',slug:'number-of-islands',
+  difficulty:'Medium',topic:'Graph',topics:['Array','DFS','BFS','Union Find'],
+  companies:['Amazon','Google','Microsoft','Meta','Flipkart'],frequency:85,acceptance:58.1,
+  rounds:['Round 2','DSA Round'],
+  description:"Given m×n grid of '1's (land) and '0's (water), return the number of islands.",
+  examples:[{input:"grid=[['1','1','0'],['0','1','0'],['0','0','1']]",output:'2'}],
+  constraints:['1 ≤ m,n ≤ 300'],hints:['DFS from each unvisited 1. Mark as 0.'],
+  testCases:[
+    {input:'4 5\n1 1 1 1 0\n1 1 0 1 0\n1 1 0 0 0\n0 0 0 0 0',output:'1',isHidden:false},
+    {input:'4 5\n1 1 0 0 0\n1 1 0 0 0\n0 0 1 0 0\n0 0 0 1 1',output:'3',isHidden:false},
+    {input:'1 1\n1',output:'1',isHidden:true},{input:'2 2\n1 0\n0 1',output:'2',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        // Write your solution here
 
-  // ========== ADDITIONAL MIXED ==========
-  { title: 'Combination Sum', difficulty: 'Medium', topic: 'Backtracking', companies: ['Amazon', 'Google', 'Microsoft', 'Flipkart'], frequency: 77, rounds: ['Round 2', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/combination-sum/', solution: { explanation: 'Backtracking: include current element (allow repeat) or skip.', timeComplexity: 'O(N^(T/M+1))', spaceComplexity: 'O(T/M)', followUpTips: 'No duplicates: sort + skip same at same level' } },
-  { title: 'House Robber', difficulty: 'Medium', topic: 'Dynamic Programming', companies: ['Amazon', 'Microsoft', 'Google', 'Flipkart', 'TCS'], frequency: 81, rounds: ['Round 1', 'DSA Round'], leetcodeLink: 'https://leetcode.com/problems/house-robber/', solution: { explanation: 'dp[i] = max(dp[i-2] + nums[i], dp[i-1]).', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'House Robber II (circular), III (binary tree)' } },
-  { title: 'Find All Anagrams in a String', difficulty: 'Medium', topic: 'Sliding Window', companies: ['Google', 'Amazon', 'Facebook', 'Microsoft'], frequency: 74, rounds: ['Round 1', 'Round 2'], leetcodeLink: 'https://leetcode.com/problems/find-all-anagrams-in-a-string/', solution: { explanation: 'Fixed-size sliding window with character frequency comparison.', timeComplexity: 'O(n)', spaceComplexity: 'O(1)', followUpTips: 'Array of 26 more efficient than HashMap for lowercase letters' } },
-  { title: 'Diameter of Binary Tree', difficulty: 'Easy', topic: 'Trees', companies: ['Amazon', 'Google', 'Microsoft', 'Flipkart'], frequency: 80, rounds: ['Round 1', 'Online Test'], leetcodeLink: 'https://leetcode.com/problems/diameter-of-binary-tree/', solution: { explanation: 'For each node, diameter = leftHeight + rightHeight. Track global max.', timeComplexity: 'O(n)', spaceComplexity: 'O(h)', followUpTips: 'Note: diameter doesn\'t have to pass through root' } },
-  { title: 'Path Sum III', difficulty: 'Medium', topic: 'Prefix Sum', companies: ['Amazon', 'Google', 'Microsoft'], frequency: 68, rounds: ['DSA Round'], leetcodeLink: 'https://leetcode.com/problems/path-sum-iii/', solution: { explanation: 'DFS with prefix sum hashmap — same as subarray sum = k.', timeComplexity: 'O(n)', spaceComplexity: 'O(n)', followUpTips: 'Elegant combination of tree DFS and prefix sum technique' } }
+    }
+};
+int main() {
+    int m,n; cin>>m>>n;
+    vector<vector<char>> g(m,vector<char>(n));
+    for(int i=0;i<m;i++) for(int j=0;j<n;j++){int x;cin>>x;g[i][j]='0'+x;}
+    cout<<Solution().numIslands(g)<<"\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public int numIslands(char[][] g) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int m=sc.nextInt(),n=sc.nextInt();
+    char[][] g=new char[m][n];
+    for(int i=0;i<m;i++) for(int j=0;j<n;j++) g[i][j]=(char)('0'+sc.nextInt());
+    System.out.println(new Solution().numIslands(g)); }}`,
+    python:`from typing import List
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    m,n=map(int,input().split())
+    g=[[str(x) for x in input().split()] for _ in range(m)]
+    print(Solution().numIslands(g))`
+  },
+  editorial:{
+    approach1:{name:'DFS Flood Fill',timeComplexity:'O(m×n)',spaceComplexity:'O(m×n)',explanation:'For each unvisited 1: count++, DFS to mark all connected land as 0.',
+      code:{cpp:"int cnt=0;\nfunction<void(int,int)> dfs=[&](int i,int j){\n  if(i<0||i>=(int)grid.size()||j<0||j>=(int)grid[0].size()||grid[i][j]!='1') return;\n  grid[i][j]='0';\n  dfs(i+1,j);dfs(i-1,j);dfs(i,j+1);dfs(i,j-1);\n};\nfor(int i=0;i<(int)grid.size();i++)\n  for(int j=0;j<(int)grid[0].size();j++)\n    if(grid[i][j]=='1'){cnt++;dfs(i,j);}\nreturn cnt;",java:'',python:''}},
+    companyNote:'Amazon: Max Area of Island. Google: Distinct Islands. Union-Find approach also valid.'
+  },
+  solution:{code:'DFS',language:'cpp',explanation:'DFS flood fill',timeComplexity:'O(mn)',spaceComplexity:'O(mn)',followUpTips:'Union Find for dynamic'}
+},
+// ===== 9. COIN CHANGE =====
+{
+  questionNumber:322,title:'Coin Change',slug:'coin-change',
+  difficulty:'Medium',topic:'Dynamic Programming',topics:['Array','Dynamic Programming','BFS'],
+  companies:['Amazon','Google','Microsoft','Meta','Zoho'],frequency:78,acceptance:43.2,
+  rounds:['Round 2','DSA Round'],
+  description:'Given coins and an amount, return fewest coins to make amount. Return -1 if impossible.',
+  examples:[{input:'coins=[1,5,11], amount=11',output:'1'},{input:'coins=[1,2,5], amount=11',output:'3'},{input:'coins=[2], amount=3',output:'-1'}],
+  constraints:['0 ≤ amount ≤ 10⁴'],hints:['Bottom-up DP. dp[i]=min coins for amount i.'],
+  testCases:[
+    {input:'3\n1 5 11\n11',output:'1',isHidden:false},
+    {input:'3\n1 2 5\n11',output:'3',isHidden:false},
+    {input:'1\n2\n3',output:'-1',isHidden:true},
+    {input:'1\n1\n0',output:'0',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int n; cin>>n; vector<int> c(n); for(auto&x:c)cin>>x;
+    int a; cin>>a; cout<<Solution().coinChange(c,a)<<"\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public int coinChange(int[] coins, int amount) { /* your code */ return -1; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] c=new int[n];
+    for(int i=0;i<n;i++) c[i]=sc.nextInt();
+    System.out.println(new Solution().coinChange(c,sc.nextInt())); }}`,
+    python:`from typing import List
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); c=list(map(int,input().split())); a=int(input())
+    print(Solution().coinChange(c,a))`
+  },
+  editorial:{
+    approach1:{name:'Bottom-up DP',timeComplexity:'O(amount×n)',spaceComplexity:'O(amount)',explanation:'dp[i]=min coins. For each amount try all coins.',
+      code:{cpp:'vector<int> dp(amount+1,INT_MAX); dp[0]=0;\nfor(int i=1;i<=amount;i++)\n  for(int c:coins)\n    if(c<=i&&dp[i-c]!=INT_MAX)\n      dp[i]=min(dp[i],dp[i-c]+1);\nreturn dp[amount]==INT_MAX?-1:dp[amount];',java:'',python:'dp=[float("inf")]*(amount+1); dp[0]=0\nfor i in range(1,amount+1):\n  for c in coins:\n    if c<=i and dp[i-c]!=float("inf"): dp[i]=min(dp[i],dp[i-c]+1)\nreturn dp[amount] if dp[amount]!=float("inf") else -1'}},
+    companyNote:'Amazon: Count ways. Google: With limited coin supply.'
+  },
+  solution:{code:'DP',language:'cpp',explanation:'Bottom-up DP',timeComplexity:'O(S×n)',spaceComplexity:'O(S)',followUpTips:'Count ways variant'}
+},
+// ===== 10. PRODUCT EXCEPT SELF =====
+{
+  questionNumber:238,title:'Product of Array Except Self',slug:'product-of-array-except-self',
+  difficulty:'Medium',topic:'Array',topics:['Array','Prefix Sum'],
+  companies:['Amazon','Meta','Google','Microsoft','Apple','Netflix'],frequency:82,acceptance:65.2,
+  rounds:['Round 1','Round 2'],
+  description:'Return array where answer[i]=product of all nums except nums[i]. O(n), no division.',
+  examples:[{input:'nums=[1,2,3,4]',output:'[24,12,8,6]'},{input:'nums=[-1,1,0,-3,3]',output:'[0,0,9,0,0]'}],
+  constraints:['2 ≤ n ≤ 10⁵','No division'],hints:['Prefix from left × suffix from right'],
+  testCases:[
+    {input:'4\n1 2 3 4',output:'[24,12,8,6]',isHidden:false},
+    {input:'5\n-1 1 0 -3 3',output:'[0,0,9,0,0]',isHidden:false},
+    {input:'2\n1 2',output:'[2,1]',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x;
+    auto r=Solution().productExceptSelf(v);
+    cout<<"["; for(int i=0;i<n;i++){if(i)cout<<",";cout<<r[i];} cout<<"]\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public int[] productExceptSelf(int[] nums) { /* your code */ return new int[0]; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt();
+    int[] r=new Solution().productExceptSelf(v);
+    StringBuilder sb=new StringBuilder("[");
+    for(int i=0;i<r.length;i++){if(i>0)sb.append(",");sb.append(r[i]);}
+    System.out.println(sb+"]"); }}`,
+    python:`from typing import List
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); v=list(map(int,input().split()))
+    print('['+','.join(map(str,Solution().productExceptSelf(v)))+']')`
+  },
+  editorial:{
+    approach1:{name:'Prefix × Suffix',timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'Left pass: prefix products. Right pass: multiply suffix.',
+      code:{cpp:'int n=nums.size(); vector<int> r(n,1);\nint p=1;\nfor(int i=0;i<n;i++){r[i]=p;p*=nums[i];}\nint s=1;\nfor(int i=n-1;i>=0;i--){r[i]*=s;s*=nums[i];}\nreturn r;',java:'',python:'n=len(nums);r=[1]*n;p=1\nfor i in range(n): r[i]=p;p*=nums[i]\ns=1\nfor i in range(n-1,-1,-1): r[i]*=s;s*=nums[i]\nreturn r'}},
+    companyNote:"Meta: zeros? Amazon: divide & conquer?"
+  },
+  solution:{code:'Prefix×Suffix',language:'cpp',explanation:'Two-pass O(1) space',timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'Handle zeros carefully'}
+},
+// ===== 11. TOP K FREQUENT =====
+{
+  questionNumber:347,title:'Top K Frequent Elements',slug:'top-k-frequent-elements',
+  difficulty:'Medium',topic:'Heap',topics:['Array','Hash Table','Heap','Bucket Sort'],
+  companies:['Amazon','Google','Meta','Microsoft','Flipkart'],frequency:76,acceptance:65.4,
+  rounds:['Round 2','DSA Round'],
+  description:'Return the k most frequent elements from array nums.',
+  examples:[{input:'nums=[1,1,1,2,2,3], k=2',output:'[1,2]'},{input:'nums=[1], k=1',output:'[1]'}],
+  constraints:['1 ≤ n ≤ 10⁵'],hints:['Count with map. Bucket sort: index=frequency.'],
+  testCases:[
+    {input:'6\n1 1 1 2 2 3\n2',output:'[1,2]',isHidden:false},
+    {input:'1\n1\n1',output:'[1]',isHidden:false},
+    {input:'5\n4 1 1 4 4\n1',output:'[4]',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x;
+    int k; cin>>k;
+    auto r=Solution().topKFrequent(v,k); sort(r.begin(),r.end());
+    cout<<"["; for(int i=0;i<(int)r.size();i++){if(i)cout<<",";cout<<r[i];} cout<<"]\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public int[] topKFrequent(int[] nums, int k) { /* your code */ return new int[0]; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt(); int k=sc.nextInt();
+    int[] r=new Solution().topKFrequent(v,k); Arrays.sort(r);
+    StringBuilder sb=new StringBuilder("[");
+    for(int i=0;i<r.length;i++){if(i>0)sb.append(",");sb.append(r[i]);}
+    System.out.println(sb+"]"); }}`,
+    python:`from typing import List
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); v=list(map(int,input().split())); k=int(input())
+    print('['+','.join(map(str,sorted(Solution().topKFrequent(v,k))))+']')`
+  },
+  editorial:{
+    approach1:{name:'Bucket Sort O(n)',timeComplexity:'O(n)',spaceComplexity:'O(n)',explanation:'bucket[freq]=list of nums. Collect top k from end.',
+      code:{cpp:'unordered_map<int,int> cnt;\nfor(int x:nums) cnt[x]++;\nvector<vector<int>> bkt(nums.size()+1);\nfor(auto&[v,f]:cnt) bkt[f].push_back(v);\nvector<int> r;\nfor(int i=bkt.size()-1;i>=0&&(int)r.size()<k;i--)\n  for(int v:bkt[i]) if((int)r.size()<k) r.push_back(v);\nreturn r;',java:'',python:''}},
+    companyNote:'Amazon: O(n). Google: Top-k in stream.'
+  },
+  solution:{code:'Bucket sort',language:'cpp',explanation:'O(n)',timeComplexity:'O(n)',spaceComplexity:'O(n)',followUpTips:'Min-heap O(n log k)'}
+},
+// ===== 12. JUMP GAME =====
+{
+  questionNumber:55,title:'Jump Game',slug:'jump-game',
+  difficulty:'Medium',topic:'Greedy',topics:['Array','Dynamic Programming','Greedy'],
+  companies:['Amazon','Microsoft','Google','Meta','Cognizant'],frequency:72,acceptance:38.5,
+  rounds:['Round 1','Round 2'],
+  description:'At each index, nums[i]=max jump length. Can you reach the last index?',
+  examples:[{input:'nums=[2,3,1,1,4]',output:'true'},{input:'nums=[3,2,1,0,4]',output:'false'}],
+  constraints:['1 ≤ n ≤ 10⁴'],hints:['Track maxReach. If i>maxReach, impossible.'],
+  testCases:[
+    {input:'5\n2 3 1 1 4',output:'true',isHidden:false},{input:'5\n3 2 1 0 4',output:'false',isHidden:false},
+    {input:'1\n0',output:'true',isHidden:true},{input:'2\n0 1',output:'false',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        // Write your solution here
+
+    }
+};
+int main() { int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x; cout<<(Solution().canJump(v)?"true":"false")<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public boolean canJump(int[] nums) { /* your code */ return false; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt();
+    System.out.println(new Solution().canJump(v)?"true":"false"); }}`,
+    python:`from typing import List
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        # Write your solution here
+        pass
+if __name__=="__main__": n=int(input()); print(str(Solution().canJump(list(map(int,input().split())))).lower())`
+  },
+  editorial:{
+    approach1:{name:'Greedy',timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'Update maxReach=max(maxReach,i+nums[i]). If i>maxReach return false.',
+      code:{cpp:'int mx=0;\nfor(int i=0;i<(int)nums.size();i++){\n  if(i>mx) return false;\n  mx=max(mx,i+nums[i]);\n}\nreturn true;',java:'int mx=0;\nfor(int i=0;i<nums.length;i++){if(i>mx)return false;mx=Math.max(mx,i+nums[i]);}\nreturn true;',python:'mx=0\nfor i,v in enumerate(nums):\n  if i>mx:return False\n  mx=max(mx,i+v)\nreturn True'}},
+    companyNote:'Amazon: Jump Game II (min jumps). Microsoft: DP approach.'
+  },
+  solution:{code:'Greedy',language:'cpp',explanation:'Greedy maxReach',timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'Jump Game II'}
+},
+// ===== 13. TRAPPING RAIN WATER =====
+{
+  questionNumber:42,title:'Trapping Rain Water',slug:'trapping-rain-water',
+  difficulty:'Hard',topic:'Array',topics:['Array','Two Pointers','Dynamic Programming','Monotonic Stack'],
+  companies:['Amazon','Google','Microsoft','Meta','Apple'],frequency:88,acceptance:60.1,
+  rounds:['Round 2','Final Round','DSA Round'],
+  description:'Compute how much water an elevation map can trap.',
+  examples:[{input:'height=[0,1,0,2,1,0,1,3,2,1,2,1]',output:'6'},{input:'height=[4,2,0,3,2,5]',output:'9'}],
+  constraints:['1 ≤ n ≤ 2×10⁴'],hints:['Two pointer: move smaller-max side, accumulate water'],
+  testCases:[
+    {input:'12\n0 1 0 2 1 0 1 3 2 1 2 1',output:'6',isHidden:false},
+    {input:'6\n4 2 0 3 2 5',output:'9',isHidden:false},
+    {input:'1\n3',output:'0',isHidden:true},{input:'3\n0 0 0',output:'0',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        // Write your solution here
+
+    }
+};
+int main() { int n; cin>>n; vector<int> h(n); for(auto&x:h)cin>>x; cout<<Solution().trap(h)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int trap(int[] height) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] h=new int[n];
+    for(int i=0;i<n;i++) h[i]=sc.nextInt();
+    System.out.println(new Solution().trap(h)); }}`,
+    python:`from typing import List
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": n=int(input()); print(Solution().trap(list(map(int,input().split()))))`
+  },
+  editorial:{
+    approach1:{name:'Two Pointers O(1)',timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'l,r pointers. Move smaller-max side. water+=maxSide-height.',
+      code:{cpp:'int l=0,r=(int)height.size()-1,lm=0,rm=0,res=0;\nwhile(l<r){\n  if(height[l]<height[r]){\n    lm=max(lm,height[l]);res+=lm-height[l];l++;\n  } else {\n    rm=max(rm,height[r]);res+=rm-height[r];r--;\n  }\n}\nreturn res;',java:'int l=0,r=height.length-1,lm=0,rm=0,res=0;\nwhile(l<r){if(height[l]<height[r]){lm=Math.max(lm,height[l]);res+=lm-height[l];l++;}else{rm=Math.max(rm,height[r]);res+=rm-height[r];r--;}}\nreturn res;',python:'l,r,lm,rm,res=0,len(h)-1,0,0,0\nwhile l<r:\n  if h[l]<h[r]: lm=max(lm,h[l]);res+=lm-h[l];l+=1\n  else: rm=max(rm,h[r]);res+=rm-h[r];r-=1\nreturn res'}},
+    companyNote:'FAANG #1 hard. Follow-up: 3D (LC 407).'
+  },
+  solution:{code:'Two pointers',language:'cpp',explanation:'O(1) space',timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'3D variant LC 407'}
+},
+// ===== 14. SINGLE NUMBER =====
+{
+  questionNumber:136,title:'Single Number',slug:'single-number',
+  difficulty:'Easy',topic:'Array',topics:['Array','Bit Manipulation'],
+  companies:['Amazon','Google','TCS','Wipro','Infosys','Cognizant'],frequency:80,acceptance:72.8,
+  rounds:['Online Test','Round 1'],
+  description:'Every element appears twice except one. Find it. O(n) time, O(1) space.',
+  examples:[{input:'nums=[2,2,1]',output:'1'},{input:'nums=[4,1,2,1,2]',output:'4'}],
+  constraints:['1 ≤ n ≤ 3×10⁴'],hints:['XOR: a^a=0, a^0=a'],
+  testCases:[
+    {input:'3\n2 2 1',output:'1',isHidden:false},{input:'5\n4 1 2 1 2',output:'4',isHidden:false},
+    {input:'1\n1',output:'1',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int singleNumber(vector<int>& nums) {
+        // Write your solution here
+
+    }
+};
+int main() { int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x; cout<<Solution().singleNumber(v)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int singleNumber(int[] nums) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt();
+    System.out.println(new Solution().singleNumber(v)); }}`,
+    python:`from typing import List
+class Solution:
+    def singleNumber(self, nums: List[int]) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": n=int(input()); print(Solution().singleNumber(list(map(int,input().split()))))`
+  },
+  editorial:{
+    approach1:{name:'XOR',timeComplexity:'O(n)',spaceComplexity:'O(1)',explanation:'XOR all. Pairs cancel. Single remains.',
+      code:{cpp:'int r=0; for(int x:nums) r^=x; return r;',java:'int r=0; for(int x:nums) r^=x; return r;',python:'from functools import reduce\nfrom operator import xor\nreturn reduce(xor,nums)'}},
+    companyNote:'TCS NQT favourite. Amazon: two non-repeating using XOR + bit trick.'
+  },
+  solution:{code:'int r=0;for(int x:nums)r^=x;return r;',language:'cpp',explanation:'XOR all',timeComplexity:'O(n)',spaceComplexity:'O(1)',followUpTips:'Two single numbers'}
+},
+// ===== 15. FIND PEAK ELEMENT =====
+{
+  questionNumber:162,title:'Find Peak Element',slug:'find-peak-element',
+  difficulty:'Medium',topic:'Binary Search',topics:['Array','Binary Search'],
+  companies:['Google','Meta','Amazon','Microsoft'],frequency:70,acceptance:52.6,
+  rounds:['Phone Screen','Round 1'],
+  description:'Find a peak element (strictly greater than neighbors). Must be O(log n).',
+  examples:[{input:'nums=[1,2,3,1]',output:'2'},{input:'nums=[1,2,1,3,5,6,4]',output:'5'}],
+  constraints:['1 ≤ n ≤ 1000'],hints:['If nums[mid]<nums[mid+1], peak is on right side'],
+  testCases:[
+    {input:'4\n1 2 3 1',output:'2',isHidden:false},{input:'7\n1 2 1 3 5 6 4',output:'5',isHidden:false},
+    {input:'1\n1',output:'0',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        // Write your solution here
+
+    }
+};
+int main() { int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x; cout<<Solution().findPeakElement(v)<<"\\n"; }`,
+    java:`import java.util.*;
+class Solution { public int findPeakElement(int[] nums) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt();
+    System.out.println(new Solution().findPeakElement(v)); }}`,
+    python:`from typing import List
+class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+        # Write your solution here
+        pass
+if __name__=="__main__": n=int(input()); print(Solution().findPeakElement(list(map(int,input().split()))))`
+  },
+  editorial:{
+    approach1:{name:'Binary Search',timeComplexity:'O(log n)',spaceComplexity:'O(1)',explanation:'If nums[mid]<nums[mid+1] go right, else go left.',
+      code:{cpp:'int lo=0,hi=(int)nums.size()-1;\nwhile(lo<hi){\n  int mid=(lo+hi)/2;\n  if(nums[mid]<nums[mid+1]) lo=mid+1; else hi=mid;\n}\nreturn lo;',java:'int lo=0,hi=nums.length-1;\nwhile(lo<hi){int mid=(lo+hi)/2;if(nums[mid]<nums[mid+1])lo=mid+1;else hi=mid;}\nreturn lo;',python:'lo,hi=0,len(nums)-1\nwhile lo<hi:\n  mid=(lo+hi)//2\n  if nums[mid]<nums[mid+1]:lo=mid+1\n  else:hi=mid\nreturn lo'}},
+    companyNote:'Google classic. Follow-up: 2D peak finding.'
+  },
+  solution:{code:'Binary search',language:'cpp',explanation:'Binary search',timeComplexity:'O(log n)',spaceComplexity:'O(1)',followUpTips:'2D peak'}
+},
+// ===== 16. SLIDING WINDOW MAXIMUM =====
+{
+  questionNumber:239,title:'Sliding Window Maximum',slug:'sliding-window-maximum',
+  difficulty:'Hard',topic:'Queue',topics:['Array','Queue','Sliding Window','Monotonic Queue'],
+  companies:['Amazon','Google','Microsoft','Flipkart'],frequency:75,acceptance:46.7,
+  rounds:['DSA Round','Final Round'],
+  description:'Sliding window of size k across array. Return max in each window.',
+  examples:[{input:'nums=[1,3,-1,-3,5,3,6,7], k=3',output:'[3,3,5,5,6,7]'}],
+  constraints:['1 ≤ n ≤ 10⁵'],hints:['Monotonic deque: front=max. Remove out-of-window indices.'],
+  testCases:[
+    {input:'8\n1 3 -1 -3 5 3 6 7\n3',output:'[3,3,5,5,6,7]',isHidden:false},
+    {input:'1\n1\n1',output:'[1]',isHidden:false},
+    {input:'4\n4 3 2 1\n2',output:'[4,3,2]',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x;
+    int k; cin>>k;
+    auto r=Solution().maxSlidingWindow(v,k);
+    cout<<"["; for(int i=0;i<(int)r.size();i++){if(i)cout<<",";cout<<r[i];} cout<<"]\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public int[] maxSlidingWindow(int[] nums, int k) { /* your code */ return new int[0]; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt(); int k=sc.nextInt();
+    int[] r=new Solution().maxSlidingWindow(v,k);
+    StringBuilder sb=new StringBuilder("[");
+    for(int i=0;i<r.length;i++){if(i>0)sb.append(",");sb.append(r[i]);}
+    System.out.println(sb+"]"); }}`,
+    python:`from typing import List
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); v=list(map(int,input().split())); k=int(input())
+    print('['+','.join(map(str,Solution().maxSlidingWindow(v,k)))+']')`
+  },
+  editorial:{
+    approach1:{name:'Monotonic Deque',timeComplexity:'O(n)',spaceComplexity:'O(k)',explanation:'Deque holds indices decreasing in value. Front=max. Pop front if out of window.',
+      code:{cpp:'deque<int> dq; vector<int> r;\nfor(int i=0;i<(int)nums.size();i++){\n  while(!dq.empty()&&dq.front()<i-k+1) dq.pop_front();\n  while(!dq.empty()&&nums[dq.back()]<nums[i]) dq.pop_back();\n  dq.push_back(i);\n  if(i>=k-1) r.push_back(nums[dq.front()]);\n}\nreturn r;',java:'',python:''}},
+    companyNote:'Amazon hardest. Master monotonic deque!'
+  },
+  solution:{code:'Deque',language:'cpp',explanation:'Monotonic deque O(n)',timeComplexity:'O(n)',spaceComplexity:'O(k)',followUpTips:'Min variant'}
+},
+// ===== 17. 3SUM =====
+{
+  questionNumber:15,title:'3Sum',slug:'3sum',
+  difficulty:'Medium',topic:'Array',topics:['Array','Two Pointers','Sorting'],
+  companies:['Google','Amazon','Meta','Microsoft','Apple'],frequency:78,acceptance:33.8,
+  rounds:['Round 2','DSA Round'],
+  description:'Find all unique triplets that sum to 0. No duplicate triplets.',
+  examples:[{input:'nums=[-1,0,1,2,-1,-4]',output:'[[-1,-1,2],[-1,0,1]]'},{input:'nums=[0,0,0]',output:'[[0,0,0]]'}],
+  constraints:['3 ≤ n ≤ 3000'],hints:['Sort. Fix i. Two pointers l,r.'],
+  testCases:[
+    {input:'6\n-1 0 1 2 -1 -4',output:'[[-1,-1,2],[-1,0,1]]',isHidden:false},
+    {input:'3\n0 0 0',output:'[[0,0,0]]',isHidden:false},
+    {input:'3\n0 1 1',output:'[]',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int n; cin>>n; vector<int> v(n); for(auto&x:v)cin>>x;
+    auto r=Solution().threeSum(v);
+    cout<<"["; for(int i=0;i<(int)r.size();i++){if(i)cout<<",";cout<<"["<<r[i][0]<<","<<r[i][1]<<","<<r[i][2]<<"]";} cout<<"]\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public List<List<Integer>> threeSum(int[] nums) { /* your code */ return new ArrayList<>(); } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(); int[] v=new int[n];
+    for(int i=0;i<n;i++) v[i]=sc.nextInt();
+    var r=new Solution().threeSum(v);
+    StringBuilder sb=new StringBuilder("[");
+    for(int i=0;i<r.size();i++){if(i>0)sb.append(",");sb.append("[").append(r.get(i).get(0)).append(",").append(r.get(i).get(1)).append(",").append(r.get(i).get(2)).append("]");}
+    System.out.println(sb+"]"); }}`,
+    python:`from typing import List
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); v=list(map(int,input().split()))
+    r=Solution().threeSum(v)
+    print('['+','.join(['['+','.join(map(str,t))+']' for t in r])+']')`
+  },
+  editorial:{
+    approach1:{name:'Sort + Two Pointers',timeComplexity:'O(n²)',spaceComplexity:'O(1)',explanation:'Sort. Fix i. l=i+1,r=n-1. Skip duplicates.',
+      code:{cpp:'sort(nums.begin(),nums.end());\nvector<vector<int>> r;\nfor(int i=0;i<(int)nums.size()-2;i++){\n  if(i>0&&nums[i]==nums[i-1]) continue;\n  int l=i+1,ri=(int)nums.size()-1;\n  while(l<ri){\n    int s=nums[i]+nums[l]+nums[ri];\n    if(s==0){r.push_back({nums[i],nums[l],nums[ri]});\n      while(l<ri&&nums[l]==nums[l+1])l++;\n      while(l<ri&&nums[ri]==nums[ri-1])ri--;\n      l++;ri--;}\n    else if(s<0)l++; else ri--;\n  }\n}\nreturn r;',java:'',python:''}},
+    companyNote:'Google: 4Sum. Meta: stream? Amazon: Closest 3Sum.'
+  },
+  solution:{code:'Sort+two ptr',language:'cpp',explanation:'O(n²)',timeComplexity:'O(n²)',spaceComplexity:'O(1)',followUpTips:'4Sum generalization'}
+},
+// ===== 18. WORD SEARCH =====
+{
+  questionNumber:79,title:'Word Search',slug:'word-search',
+  difficulty:'Medium',topic:'Backtracking',topics:['Array','Backtracking','Matrix'],
+  companies:['Amazon','Microsoft','Google','Meta','Accenture'],frequency:72,acceptance:41.8,
+  rounds:['Round 2','DSA Round'],
+  description:'Given m×n character grid, return true if word exists via adjacent horizontal/vertical cells without reuse.',
+  examples:[{input:'board=[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word="ABCCED"',output:'true'}],
+  constraints:['1 ≤ m,n ≤ 6','1 ≤ word.length ≤ 15'],hints:['DFS from each cell. Mark # then restore.'],
+  testCases:[
+    {input:'3 4\nA B C E\nS F C S\nA D E E\nABCCED',output:'true',isHidden:false},
+    {input:'3 4\nA B C E\nS F C S\nA D E E\nSEE',output:'true',isHidden:false},
+    {input:'3 4\nA B C E\nS F C S\nA D E E\nABCB',output:'false',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int m,n; cin>>m>>n;
+    vector<vector<char>> b(m,vector<char>(n));
+    for(int i=0;i<m;i++) for(int j=0;j<n;j++){char c;cin>>c;b[i][j]=c;}
+    string w; cin>>w;
+    cout<<(Solution().exist(b,w)?"true":"false")<<"\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public boolean exist(char[][] b, String word) { /* your code */ return false; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int m=sc.nextInt(),n=sc.nextInt();
+    char[][] b=new char[m][n];
+    for(int i=0;i<m;i++) for(int j=0;j<n;j++) b[i][j]=sc.next().charAt(0);
+    System.out.println(new Solution().exist(b,sc.next())?"true":"false"); }}`,
+    python:`from typing import List
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    m,n=map(int,input().split())
+    b=[input().split() for _ in range(m)]
+    print(str(Solution().exist(b,input().strip())).lower())`
+  },
+  editorial:{
+    approach1:{name:'DFS + Backtracking',timeComplexity:'O(m×n×4^L)',spaceComplexity:'O(L)',explanation:'For each start cell, DFS 4 dirs. Mark # during explore, restore after.',
+      code:{cpp:"int m=board.size(),n=board[0].size();\nfunction<bool(int,int,int)> dfs=[&](int i,int j,int k)->bool{\n  if(k==(int)word.size()) return true;\n  if(i<0||i>=m||j<0||j>=n||board[i][j]!=word[k]) return false;\n  char t=board[i][j]; board[i][j]='#';\n  bool r=dfs(i+1,j,k+1)||dfs(i-1,j,k+1)||dfs(i,j+1,k+1)||dfs(i,j-1,k+1);\n  board[i][j]=t; return r;\n};\nfor(int i=0;i<m;i++) for(int j=0;j<n;j++) if(dfs(i,j,0)) return true;\nreturn false;",java:'',python:''}},
+    companyNote:'Amazon: Word Search II (Trie). Microsoft: Count all occurrences.'
+  },
+  solution:{code:'DFS backtrack',language:'cpp',explanation:'DFS+Backtrack',timeComplexity:'O(mn×4^L)',spaceComplexity:'O(L)',followUpTips:'Word Search II Trie'}
+},
+// ===== 19. COURSE SCHEDULE =====
+{
+  questionNumber:207,title:'Course Schedule',slug:'course-schedule',
+  difficulty:'Medium',topic:'Graph',topics:['DFS','BFS','Graph','Topological Sort'],
+  companies:['Google','Amazon','Meta','Microsoft','Zoho'],frequency:75,acceptance:46.5,
+  rounds:['Round 2','DSA Round'],
+  description:'numCourses courses with prerequisites. Return true if all can be finished (no cycle).',
+  examples:[{input:'n=2, pre=[[1,0]]',output:'true'},{input:'n=2, pre=[[1,0],[0,1]]',output:'false'}],
+  constraints:['1 ≤ numCourses ≤ 2000'],hints:["Kahn's BFS or DFS cycle detection"],
+  testCases:[
+    {input:'2\n1\n1 0',output:'true',isHidden:false},
+    {input:'2\n2\n1 0\n0 1',output:'false',isHidden:false},
+    {input:'1\n0',output:'true',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int n,m; cin>>n>>m;
+    vector<vector<int>> pre(m,vector<int>(2));
+    for(int i=0;i<m;i++) cin>>pre[i][0]>>pre[i][1];
+    cout<<(Solution().canFinish(n,pre)?"true":"false")<<"\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public boolean canFinish(int n, int[][] pre) { /* your code */ return false; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in); int n=sc.nextInt(),m=sc.nextInt();
+    int[][] pre=new int[m][2];
+    for(int i=0;i<m;i++){pre[i][0]=sc.nextInt();pre[i][1]=sc.nextInt();}
+    System.out.println(new Solution().canFinish(n,pre)?"true":"false"); }}`,
+    python:`from typing import List
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    n=int(input()); m=int(input())
+    pre=[list(map(int,input().split())) for _ in range(m)] if m else []
+    print(str(Solution().canFinish(n,pre)).lower())`
+  },
+  editorial:{
+    approach1:{name:"Kahn's BFS Topological Sort",timeComplexity:'O(V+E)',spaceComplexity:'O(V+E)',explanation:'Count in-degrees. BFS from 0-indegree nodes. All processed = acyclic.',
+      code:{cpp:'vector<int> indeg(numCourses,0);\nvector<vector<int>> adj(numCourses);\nfor(auto&p:prerequisites){adj[p[1]].push_back(p[0]);indeg[p[0]]++;}\nqueue<int> q;\nfor(int i=0;i<numCourses;i++) if(!indeg[i]) q.push(i);\nint cnt=0;\nwhile(!q.empty()){int u=q.front();q.pop();cnt++;for(int v:adj[u]) if(--indeg[v]==0) q.push(v);}\nreturn cnt==numCourses;',java:'',python:''}},
+    companyNote:'Google: Course Schedule II (return order). Meta: Alien Dictionary. Amazon: Task Scheduler.'
+  },
+  solution:{code:'Kahn BFS',language:'cpp',explanation:'Topological sort',timeComplexity:'O(V+E)',spaceComplexity:'O(V+E)',followUpTips:'Course Schedule II'}
+},
+// ===== 20. MEDIAN OF TWO SORTED ARRAYS =====
+{
+  questionNumber:4,title:'Median of Two Sorted Arrays',slug:'median-of-two-sorted-arrays',
+  difficulty:'Hard',topic:'Binary Search',topics:['Array','Binary Search','Divide and Conquer'],
+  companies:['Google','Amazon','Microsoft','Meta','Apple'],frequency:80,acceptance:39.2,
+  rounds:['Final Round','DSA Round'],
+  description:'Given two sorted arrays, return the median. Required: O(log(m+n)).',
+  examples:[{input:'nums1=[1,3], nums2=[2]',output:'2.00000'},{input:'nums1=[1,2], nums2=[3,4]',output:'2.50000'}],
+  constraints:['0 ≤ m,n ≤ 1000'],hints:['Binary search on smaller array partition'],
+  testCases:[
+    {input:'2\n1 3\n1\n2',output:'2.00000',isHidden:false},
+    {input:'2\n1 2\n2\n3 4',output:'2.50000',isHidden:false},
+    {input:'1\n3\n2\n1 2',output:'2.00000',isHidden:true},
+  ],
+  starterCode:{
+    cpp:`#include <bits/stdc++.h>
+using namespace std;
+class Solution {
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        // Write your solution here
+
+    }
+};
+int main() {
+    int m; cin>>m; vector<int> a(m); for(auto&x:a)cin>>x;
+    int n; cin>>n; vector<int> b(n); for(auto&x:b)cin>>x;
+    cout<<fixed<<setprecision(5)<<Solution().findMedianSortedArrays(a,b)<<"\\n";
+}`,
+    java:`import java.util.*;
+class Solution { public double findMedianSortedArrays(int[] a, int[] b) { /* your code */ return 0; } }
+class Main { public static void main(String[] args) {
+    Scanner sc=new Scanner(System.in);
+    int m=sc.nextInt(); int[] a=new int[m]; for(int i=0;i<m;i++) a[i]=sc.nextInt();
+    int n=sc.nextInt(); int[] b=new int[n]; for(int i=0;i<n;i++) b[i]=sc.nextInt();
+    System.out.printf("%.5f%n",new Solution().findMedianSortedArrays(a,b)); }}`,
+    python:`from typing import List
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        # Write your solution here
+        pass
+if __name__=="__main__":
+    m=int(input()); a=list(map(int,input().split())) if m else []
+    n=int(input()); b=list(map(int,input().split())) if n else []
+    print(f"{Solution().findMedianSortedArrays(a,b):.5f}")`
+  },
+  editorial:{
+    approach1:{name:'Binary Search Partition',timeComplexity:'O(log(min(m,n)))',spaceComplexity:'O(1)',explanation:'Binary search on smaller array. Partition so left count = right count.',
+      code:{cpp:'if(nums1.size()>nums2.size()) return findMedianSortedArrays(nums2,nums1);\nint m=nums1.size(),n=nums2.size(),lo=0,hi=m;\nwhile(lo<=hi){\n  int i=(lo+hi)/2,j=(m+n+1)/2-i;\n  int lm1=i?nums1[i-1]:INT_MIN,rm1=i<m?nums1[i]:INT_MAX;\n  int lm2=j?nums2[j-1]:INT_MIN,rm2=j<n?nums2[j]:INT_MAX;\n  if(lm1<=rm2&&lm2<=rm1){\n    if((m+n)%2) return max(lm1,lm2);\n    return(max(lm1,lm2)+min(rm1,rm2))/2.0;\n  }\n  else if(lm1>rm2) hi=i-1; else lo=i+1;\n}\nreturn 0;',java:'',python:''}},
+    companyNote:'Google onsite must-know! Follow-up: kth element.'
+  },
+  solution:{code:'Binary partition',language:'cpp',explanation:'O(log min(m,n))',timeComplexity:'O(log(m+n))',spaceComplexity:'O(1)',followUpTips:'Kth element generalization'}
+}
 ];
 
 async function seed() {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/placeprep');
-    console.log('Connected to MongoDB');
-
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/placeprep');
+    console.log('MongoDB connected');
     await Question.deleteMany({});
-    console.log('Cleared existing questions');
-
+    console.log('Cleared questions');
     const inserted = await Question.insertMany(questions);
-    console.log(`Seeded ${inserted.length} DSA questions`);
-
+    console.log(`\n✅ Seeded ${inserted.length} FAANG questions!`);
+    const counts = {Easy:0,Medium:0,Hard:0};
+    inserted.forEach(q => counts[q.difficulty]++);
+    console.log(`   Easy: ${counts.Easy} | Medium: ${counts.Medium} | Hard: ${counts.Hard}`);
+    const allCompanies = [...new Set(inserted.flatMap(q=>q.companies))].sort();
+    console.log(`   Companies covered: ${allCompanies.join(', ')}`);
+  } catch(err) {
+    console.error('Seed error:', err.message);
+  } finally {
     await mongoose.disconnect();
-    console.log('Done! Disconnected from MongoDB');
-  } catch (err) {
-    console.error('Seed error:', err);
-    process.exit(1);
+    console.log('Done.');
   }
 }
 

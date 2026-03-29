@@ -43,6 +43,9 @@ app.use('/api/resume', require('./routes/resume'));
 app.use('/api/college', require('./routes/college'));
 app.use('/api/aptitude', require('./routes/aptitude'));
 app.use('/api/solutions', require('./routes/solutions'));
+app.use('/api/daily', require('./routes/daily'));
+app.use('/api/leaderboard', require('./routes/leaderboard'));
+app.use('/api/experiences', require('./routes/experiences'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'PlacePrep API running' }));

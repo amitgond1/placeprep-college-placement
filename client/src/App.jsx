@@ -17,6 +17,12 @@ import AptitudeMockTest from './pages/AptitudeMockTest';
 import AptitudeResults from './pages/AptitudeResults';
 import Profile from './pages/Profile';
 import Compiler from './pages/Compiler';
+import CoreSubjects from './pages/CoreSubjects';
+import InterviewPrep from './pages/InterviewPrep';
+import FlashCards from './pages/FlashCards';
+import DailyChallenge from './pages/DailyChallenge';
+import Leaderboard from './pages/Leaderboard';
+import InterviewExperiences from './pages/InterviewExperiences';
 import Layout from './components/Layout';
 
 if (typeof window !== 'undefined') {
@@ -82,8 +88,14 @@ export default function App() {
               <Route path="/aptitude/my-results" element={<Navigate to="/aptitude?tab=results" replace />} />
               <Route path="/aptitude/mock/:mockId" element={<AptitudeMockTest />} />
               <Route path="/aptitude/results/:resultId" element={<AptitudeResults />} />
+              <Route path="/core-subjects" element={<CoreSubjects />} />
+              <Route path="/interview-prep" element={<InterviewPrep />} />
+              <Route path="/flashcards" element={<FlashCards />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/compiler/:id" element={<Compiler />} />
+              <Route path="/daily" element={<DailyChallenge />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/experiences" element={<InterviewExperiences />} />
             </Route>
           </Routes>
         </BrowserRouter>

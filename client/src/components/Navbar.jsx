@@ -29,19 +29,36 @@ export default function Navbar() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [readIds, setReadIds] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('pp_read_notifs') || '[]')); }
+    catch { return new Set(); }
+  });
 
   const userName = user?.name || 'Student';
   const userCollege = user?.college || 'College not set';
-  const userStreak = user?.streak ?? 0;
+  const userStreak = user?.currentStreak ?? user?.streak ?? 0;
   const userAvatar = user?.avatar || null;
   const initials = getInitials(userName);
   const gradient = getAvatarGradient(userName);
 
+  const dsaToday = user?.dsaSolvedToday ?? 0;
+  const dsaTotal = user?.dsaSolvedTotal ?? 0;
+
   const notifications = [
-    { id: 1, text: 'You solved 3 DSA problems today!', time: '2h ago', unread: true },
-    { id: 2, text: 'Mock interview scheduled for tomorrow', time: '5h ago', unread: true },
-    { id: 3, text: 'New company added: Zepto', time: '1d ago', unread: false },
+    ...(userStreak >= 3 ? [{ id: 'streak', text: `🔥 ${userStreak}-day streak! You're on fire — keep it up!`, time: 'now', unread: !readIds.has('streak') }] : []),
+    ...(dsaToday > 0 ? [{ id: 'today', text: `✅ You solved ${dsaToday} DSA problem${dsaToday > 1 ? 's' : ''} today! Great work!`, time: 'today', unread: !readIds.has('today') }] : []),
+    ...(dsaTotal >= 10 && dsaTotal % 10 === 0 ? [{ id: `mile${dsaTotal}`, text: `🏆 Milestone! You've solved ${dsaTotal} DSA problems total!`, time: 'recently', unread: !readIds.has(`mile${dsaTotal}`) }] : []),
+    { id: 'flashcards', text: '🆕 Flash Cards added! Revise Aptitude, OS, DBMS, OOP formulas quickly.', time: '1d ago', unread: !readIds.has('flashcards') },
+    { id: 'interviewprep', text: '🆕 Interview Prep added! HR Q&A, GD Topics & more inside.', time: '1d ago', unread: !readIds.has('interviewprep') },
+    { id: 'tip', text: '💡 Tip: Solve 1 aptitude mock test daily for campus placements.', time: '2d ago', unread: !readIds.has('tip') },
   ];
+
+  const markRead = (ids) => {
+    const next = new Set([...readIds, ...ids]);
+    setReadIds(next);
+    try { localStorage.setItem('pp_read_notifs', JSON.stringify([...next])); } catch {}
+  };
+
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
@@ -159,7 +176,10 @@ export default function Navbar() {
                     <span className="text-sm font-semibold text-[var(--text-primary)]">
                       Notifications
                     </span>
-                    <span className="text-xs text-[#7c3aed] font-medium cursor-pointer hover:underline">
+                    <span
+                      className="text-xs text-[#7c3aed] font-medium cursor-pointer hover:underline"
+                      onClick={() => markRead(notifications.map(n => n.id))}
+                    >
                       Mark all read
                     </span>
                   </div>
@@ -167,6 +187,7 @@ export default function Navbar() {
                     {notifications.map((notif) => (
                       <div
                         key={notif.id}
+                        onClick={() => markRead([notif.id])}
                         className={`px-4 py-3 flex gap-3 hover:bg-white/5 transition-colors cursor-pointer ${
                           notif.unread ? 'bg-[#7c3aed]/5' : ''
                         }`}

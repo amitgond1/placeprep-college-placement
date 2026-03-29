@@ -10,7 +10,10 @@ const aptitudeQuestionSchema = new mongoose.Schema({
   difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Medium' },
   companyTag: [{ type: String }],
   avgTimeSeconds: { type: Number, default: 60 },
-  mockType: { type: String, default: 'general' }
+  mockType: { type: String, default: 'general' },
+  isPYQ: { type: Boolean, default: false, index: true },
+  year: { type: Number },
+  section: { type: String } // quant | reasoning | verbal | di
 }, { timestamps: true });
 
 module.exports = mongoose.model('AptitudeQuestion', aptitudeQuestionSchema);

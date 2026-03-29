@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -20,6 +20,11 @@ import {
   ChevronUp,
   Menu,
   X,
+  Brain,
+  Layers,
+  Flame,
+  Trophy,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -40,10 +45,18 @@ const NAV_ITEMS = [
     subItems: [
       { label: 'Mock Tests', path: '/aptitude?tab=mocks' },
       { label: 'Topic Drill', path: '/aptitude?tab=drill' },
+      { label: 'Study Guide', path: '/aptitude?tab=guide' },
+      { label: 'Prev Year Qs', path: '/aptitude?tab=pyq' },
       { label: 'Company Patterns', path: '/aptitude?tab=patterns' },
       { label: 'My Results', path: '/aptitude?tab=results' },
     ],
   },
+  { label: 'Core Subjects', icon: GraduationCap, path: '/core-subjects' },
+  { label: 'Interview Prep', icon: Brain, path: '/interview-prep' },
+  { label: 'Flash Cards', icon: Layers, path: '/flashcards' },
+  { label: 'Daily Challenge', icon: Flame, path: '/daily' },
+  { label: 'Leaderboard', icon: Trophy, path: '/leaderboard' },
+  { label: 'Experiences', icon: Users, path: '/experiences' },
   { label: 'Package Calc', icon: TrendingUp, path: '/calculator' },
   { label: 'Profile', icon: User, path: '/profile' },
 ];
@@ -60,6 +73,9 @@ export default function Layout() {
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isCompilerPage = location.pathname.startsWith('/compiler/');
+  const isFullScreenPage = isCompilerPage || location.pathname.startsWith('/aptitude/mock/');
 
   const [collapsed, setCollapsed] = useState(() => {
     const stored = localStorage.getItem('sidebar-collapsed');
@@ -179,6 +195,15 @@ export default function Layout() {
       </NavLink>
     );
   };
+
+  // Full-screen for compiler — hide sidebar and navbar
+  if (isFullScreenPage) {
+    return (
+      <div className="h-screen w-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+        <Outlet />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>

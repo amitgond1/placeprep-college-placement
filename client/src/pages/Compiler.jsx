@@ -219,6 +219,18 @@ export default function Compiler() {
     setSubmitting(false);
   };
 
+  const handleMarkSolved = async () => {
+    try {
+      await api.post(`/dsa/mark-solved/${id}`);
+      setSolved(true);
+      setShowSuccessModal(true);
+      launchConfetti();
+      toast.success('Marked as solved! 🎉');
+    } catch {
+      toast.error('Failed to mark as solved');
+    }
+  };
+
   // Load solutions/submissions
   const fetchSolutions = useCallback(async () => {
     if (!id) return;
@@ -265,6 +277,7 @@ export default function Compiler() {
   const langInfo = LANGS.find(l => l.id === lang);
   const diff = question?.difficulty;
   const isBusy = running || submitting;
+  const noTestCases = !question?.testCases?.length;
 
   if (loading) return (
     <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-primary)' }}>
@@ -389,6 +402,31 @@ export default function Compiler() {
                         </details>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* LeetCode link + no test cases notice */}
+                {(question.leetcodeLink || noTestCases) && (
+                  <div className="space-y-2 pt-1">
+                    {question.leetcodeLink && (
+                      <a href={question.leetcodeLink} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-xs font-medium hover:underline"
+                        style={{ color: '#f59e0b' }}>
+                        <span>🔗</span> Open on LeetCode ↗
+                      </a>
+                    )}
+                    {noTestCases && (
+                      <div className="rounded-xl p-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                        <p className="text-xs leading-relaxed" style={{ color: '#f59e0b' }}>
+                          ⚠️ Automated judge not configured for this question. Write your solution, verify it on LeetCode, then click <strong>Mark Solved</strong>.
+                        </p>
+                        <button onClick={handleMarkSolved}
+                          className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                          style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', color: '#fff' }}>
+                          <CheckCircle2 size={11} /> Mark as Solved
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -622,12 +660,21 @@ export default function Compiler() {
                 <Play size={14} fill="#22c55e" />
                 {running ? 'Running...' : 'Run'}
               </button>
-              <button onClick={handleSubmit} disabled={isBusy}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', color: '#fff' }}>
-                <Send size={14} />
-                {submitting ? 'Submitting...' : 'Submit'}
-              </button>
+              {noTestCases ? (
+                <button onClick={handleMarkSolved}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', color: '#fff' }}>
+                  <CheckCircle2 size={14} />
+                  Mark Solved
+                </button>
+              ) : (
+                <button onClick={handleSubmit} disabled={isBusy}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)', color: '#fff' }}>
+                  <Send size={14} />
+                  {submitting ? 'Submitting...' : 'Submit'}
+                </button>
+              )}
             </div>
           </div>
 

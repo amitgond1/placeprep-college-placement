@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(node seeds/seed.js)",
+      "Bash(node seeds/seed_aptitude.js)",
+      "Bash(node -e \"require\\(''./server/models/Submission''\\); require\\(''./server/models/CommunitySolution''\\); require\\(''./server/models/Question''\\); console.log\\(''All models OK''\\)\")",
+      "Bash(npx vite:*)",
+      "Bash(timeout 5 node server.js)",
+      "Bash(node seeds/seed_aptitude_extra.js)",
+      "Bash(node seeds/seed_pyq.js)",
+      "Bash(npm run:*)",
+      "Bash(node -e \":*)",
+      "Bash(grep -l \"starterCode\\\\|update_dsa_starter\" \"d:/AI program/collage palecement/server/seeds/\"*.js)",
+      "Bash(node seeds/update_dsa_startercode.js)"
     ]
   }
 }
